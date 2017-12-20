@@ -1,22 +1,17 @@
 import Foundation
 
 public final class FailablePromise<Value> {
-    private let valuePromise: Promise<Value>
-    private let errorPromise: Promise<Swift.Error>
+    private let (valuePromise, fulfill) = Promise<Value>.make()
+    private let (errorPromise, reject) = Promise<Error>.make()
     private let resultPromise: Promise<Result<Value>>
     
-    private let fulfill: (Value) -> Void
-    private let reject: (Swift.Error) -> Void
-    
-    private init() {
-        (valuePromise, fulfill) = Promise<Value>.makePromise()
-        (errorPromise, reject) = Promise<Swift.Error>.makePromise()
-        resultPromise = valuePromise.map(Result.success).race(with: errorPromise.map(Result.failure))
+    init() {
+        resultPromise = valuePromise.map(Result.success).racing(with: errorPromise.map(Result.failure))
     }
 }
 
 public extension FailablePromise {
-    convenience init(_ work: @escaping (_ fulfill: @escaping (Value) -> Void, _ reject: @escaping (Swift.Error) -> Void) throws -> Void) {
+    convenience init(_ work: (_ fulfill: @escaping (Value) -> Void, _ reject: @escaping (Error) -> Void) throws -> Void) {
         self.init()
         
         do {
@@ -26,11 +21,7 @@ public extension FailablePromise {
         }
     }
     
-    static var pending: FailablePromise {
-        return FailablePromise()
-    }
-    
-    static func makePromise() -> (promise: FailablePromise, fulfill: (Value) -> Void, reject: (Swift.Error) -> Void) {
+    static func makePromise() -> (promise: FailablePromise, fulfill: (Value) -> Void, reject: (Error) -> Void) {
         let promise = FailablePromise()
         return (promise, promise.fulfill, promise.reject)
     }
@@ -43,7 +34,7 @@ public extension FailablePromise {
         }
     }
     
-    func `catch`(_ handler: @escaping (Swift.Error) -> Void) {
+    func `catch`(_ handler: @escaping (Error) -> Void) {
         resultPromise.then { result in
             if case .failure(let error) = result {
                 handler(error)

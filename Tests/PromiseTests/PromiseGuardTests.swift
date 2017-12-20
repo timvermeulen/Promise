@@ -3,7 +3,7 @@ import Promise
 
 final class PromiseGuardTests: XCTestCase {
     func testGuardRejects() {
-        let promise = FailablePromise.fulfilled(with: true).guard { !$0 }
+        let promise = FailablePromise.fulfilled(with: true).guard(orFailWith: SimpleError()) { !$0 }
         
         testExpectation { fulfillExpectation in
             promise.catch { _ in
@@ -13,7 +13,7 @@ final class PromiseGuardTests: XCTestCase {
     }
     
     func testGuardSucceeds() {
-        let promise = FailablePromise.fulfilled.guard { true }
+        let promise = FailablePromise.fulfilled.guard(orFailWith: SimpleError()) { true }
         
         testExpectation { fulfillExpectation in
             promise.then {
@@ -23,7 +23,7 @@ final class PromiseGuardTests: XCTestCase {
     }
     
     func testGuardOnlyCalledOnSucceess() {
-        let promise = FailablePromise.rejected(with: SimpleError()).guard { XCTFail(); return true }
+        let promise = FailablePromise.rejected(with: SimpleError()).guard(orFailWith: SimpleError()) { XCTFail(); return true }
         
         testExpectation { fulfillExpectation in
             promise.catch { _ in

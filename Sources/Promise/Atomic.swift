@@ -1,11 +1,12 @@
 import Foundation
 
 struct Atomic<Value> {
-    private let queue = DispatchQueue(label: "queue")
     private var _value: Value
+    private let queue: DispatchQueue
     
-    init(_ value: Value) {
-        _value = value
+    init(_ value: Value, queue: DispatchQueue = DispatchQueue(label: "queue")) {
+        self._value = value
+        self.queue = queue
     }
 }
 

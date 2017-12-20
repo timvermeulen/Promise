@@ -21,12 +21,12 @@ private extension Promise {
 }
 
 public extension Promise {
-    convenience init(_ work: @escaping (_ fulfill: @escaping (Value) -> Void) -> Void) {
+    convenience init(_ work: (_ fulfill: @escaping (Value) -> Void) -> Void) {
         self.init()
         work(fulfill)
     }
     
-    static func makePromise() -> (promise: Promise, fulfill: (Value) -> Void) {
+    static func make() -> (promise: Promise, fulfill: (Value) -> Void) {
         let promise = Promise()
         return (promise, promise.fulfill)
     }

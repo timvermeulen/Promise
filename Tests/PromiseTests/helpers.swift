@@ -11,16 +11,11 @@ extension XCTestCase {
     func assertPromiseIsPending<Value>(_ promise: FailablePromise<Value>, file: StaticString = #file, line: UInt = #line) {
         var flag = false
         
-        testExpectation { fulfillExpectation in
-            promise.always {
-                XCTAssert(flag, file: file, line: line)
-            }
-            
-            delay(0.1) {
-                flag = true
-                fulfillExpectation()
-            }
+        promise.always {
+            XCTAssert(flag, file: file, line: line)
         }
+        
+        flag = true
     }
 }
 
