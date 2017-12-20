@@ -1,35 +1,22 @@
-import Foundation
-
 public final class Promise<Value> {
-    private var state = State.pending
-    private let lockQueue = DispatchQueue(label: "promise_lock_queue", qos: .userInitiated)
-    private var callbacks: [Callback] = []
-    
-    private init() {}
+    private var state = Atomic(State.pending(callbacks: []))
 }
 
 private extension Promise {
-    func fulfill(with value: Value) {
-        // this needs to be done synchronously because `async`
-        // does not guarantee any particular order
-        lockQueue.sync {
-            guard case .pending = state else { return }
-            
-            state = .fulfilled(with: value)
-            callbacks.forEach { $0.call(with: value) }
-            callbacks.removeAll()
-        }
+    indirect enum State {
+        case pending(callbacks: [(Value) -> Void])
+        case fulfilled(with: Value)
     }
     
-    func addCallback(_ callback: Callback) {
-        lockQueue.async {
-            switch self.state {
-            case .pending:
-                self.callbacks.append(callback)
-            case .fulfilled(let value):
-                callback.call(with: value)
-            }
+    func fulfill(with value: Value) {
+        let callbacks: [(Value) -> Void]? = state.mutate { state in
+            guard case .pending(let callbacks) = state else { return nil }
+            
+            state = .fulfilled(with: value)
+            return callbacks
         }
+        
+        callbacks?.forEach { $0(value) }
     }
 }
 
@@ -44,7 +31,20 @@ public extension Promise {
         return (promise, promise.fulfill)
     }
     
-    func then(on context: ExecutionContext = .defaultForeground, handler: @escaping (Value) -> Void) {
-        addCallback(Callback(context: context, handler: handler))
+    func then(_ callback: @escaping (Value) -> Void) {
+        let value: Value? = state.mutate { state in
+            switch state {
+            case .pending(var callbacks):
+                callbacks.append(callback)
+                state = .pending(callbacks: callbacks)
+                return nil
+            case .fulfilled(let value):
+                return value
+            }
+        }
+        
+        if let value = value {
+            callback(value)
+        }
     }
 }

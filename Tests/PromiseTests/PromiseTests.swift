@@ -143,19 +143,6 @@ final class PromiseTests: XCTestCase {
         }
     }
 
-    func testZalgoContained() {
-        var flag = false
-
-        testExpectation() { fulfillExpectation in
-            FailablePromise.fulfilled.then {
-                XCTAssert(flag)
-                fulfillExpectation()
-            }
-            
-            flag = true
-        }
-    }
-    
     func testDoubleResolve() {
         let promise = FailablePromise<Bool> { fulfill, _ in
             fulfill(true)

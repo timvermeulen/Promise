@@ -1,16 +1,16 @@
 extension Promise {
-    func map<NewValue>(on context: ExecutionContext = .defaultBackground, _ transform: @escaping (Value) -> NewValue) -> Promise<NewValue> {
+    func map<NewValue>(_ transform: @escaping (Value) -> NewValue) -> Promise<NewValue> {
         return .init { fulfill in
-            self.then(on: context) { value in
+            self.then { value in
                 fulfill(transform(value))
             }
         }
     }
     
-    func race(with other: Promise, on context: ExecutionContext = .defaultBackground) -> Promise {
+    func race(with other: Promise) -> Promise {
         return Promise { fulfill in
-            self.then(on: context, handler: fulfill)
-            other.then(on: context, handler: fulfill)
+            self.then(fulfill)
+            other.then(fulfill)
         }
     }
 }

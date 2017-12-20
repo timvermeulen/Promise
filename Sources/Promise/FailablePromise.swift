@@ -4,6 +4,7 @@ public final class FailablePromise<Value> {
     private let valuePromise: Promise<Value>
     private let errorPromise: Promise<Swift.Error>
     private let resultPromise: Promise<Result<Value>>
+    
     private let fulfill: (Value) -> Void
     private let reject: (Swift.Error) -> Void
     
@@ -15,15 +16,13 @@ public final class FailablePromise<Value> {
 }
 
 public extension FailablePromise {
-    convenience init(on context: ExecutionContext = .defaultForeground, work: @escaping (_ fulfill: @escaping (Value) -> Void, _ reject: @escaping (Swift.Error) -> Void) throws -> Void) {
+    convenience init(_ work: @escaping (_ fulfill: @escaping (Value) -> Void, _ reject: @escaping (Swift.Error) -> Void) throws -> Void) {
         self.init()
         
-        context.execute {
-            do {
-                try work(self.fulfill, self.reject)
-            } catch {
-                self.reject(error)
-            }
+        do {
+            try work(fulfill, reject)
+        } catch {
+            reject(error)
         }
     }
     
@@ -36,24 +35,24 @@ public extension FailablePromise {
         return (promise, promise.fulfill, promise.reject)
     }
     
-    func then(on context: ExecutionContext = .defaultForeground, _ handler: @escaping (Value) -> Void) {
-        resultPromise.then(on: context) { result in
+    func then(_ handler: @escaping (Value) -> Void) {
+        resultPromise.then { result in
             if case .success(let value) = result {
                 handler(value)
             }
         }
     }
     
-    func `catch`(on context: ExecutionContext = .defaultForeground, _ handler: @escaping (Swift.Error) -> Void) {
-        resultPromise.then(on: context) { result in
+    func `catch`(_ handler: @escaping (Swift.Error) -> Void) {
+        resultPromise.then { result in
             if case .failure(let error) = result {
                 handler(error)
             }
         }
     }
     
-    func always(on context: ExecutionContext = .defaultForeground, _ handler: @escaping () -> Void) {
-        resultPromise.then(on: context) { _ in
+    func always(_ handler: @escaping () -> Void) {
+        resultPromise.then { _ in
             handler()
         }
     }
