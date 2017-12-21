@@ -4,7 +4,7 @@ import Promise
 final class PromiseDelayTests: XCTestCase {
     func testDelay() {
         let promise = FailablePromise.fulfilled.delayed(by: 0.5)
-        assertPromiseIsPending(promise)
+        promise.assertIsPending()
         
         testExpectation { fulfillExpectation in
             promise.then {
@@ -15,7 +15,7 @@ final class PromiseDelayTests: XCTestCase {
     
     func testTimeout() {
         let promise = FailablePromise<Void>.pending.timedOut(after: 0.5, withError: SimpleError())
-        assertPromiseIsPending(promise)
+        promise.assertIsPending()
         
         testExpectation { fulfillExpectation in
             promise.catch { _ in
@@ -28,7 +28,7 @@ final class PromiseDelayTests: XCTestCase {
         let promise = FailablePromise.fulfilled.delayed(by: 0.5)
         let withTimeout = promise.timedOut(after: 1.5, withError: SimpleError())
         
-        assertPromiseIsPending(promise)
+        promise.assertIsPending()
         
         testExpectation { fulfillExpectation in
             withTimeout.then {
@@ -42,7 +42,7 @@ final class PromiseDelayTests: XCTestCase {
         let promise = FailablePromise.fulfilled.delayed(by: 1)
         let withTimeout = promise.timedOut(after: 0.5, withError: SimpleError())
         
-        assertPromiseIsPending(withTimeout)
+        withTimeout.assertIsPending()
         
         testExpectation { fulfillExpectation in
             withTimeout.catch { _ in

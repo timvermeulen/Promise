@@ -6,17 +6,12 @@ final class PromiseTests: XCTestCase {
         var flag = false
         let promise = FailablePromise.fulfilled
         
-        testExpectation { fulfillExpectation in
-            promise.then {
-                XCTAssertFalse(flag)
-                flag = true
-            }
-            
-            promise.delayed(by: 0.1).then {
-                XCTAssert(flag)
-                fulfillExpectation()
-            }
+        promise.then {
+            XCTAssertFalse(flag)
+            flag = true
         }
+        
+        wait(0.1)
     }
     
     func testAsync() {
@@ -29,7 +24,7 @@ final class PromiseTests: XCTestCase {
         }
     }
 
-    func testAsyncThrowing() {
+    func testThrowing() {
         let promise = FailablePromise<Void> { _, _ in
             throw SimpleError()
         }

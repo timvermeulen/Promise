@@ -1,5 +1,5 @@
 import XCTest
-@testable import Promise
+import Promise
 
 extension XCTestCase {
     func testExpectation(description: String = #function, timeout: TimeInterval = 1, block: (_ fulfill: @escaping () -> Void) throws -> Void) rethrows {
@@ -8,14 +8,67 @@ extension XCTestCase {
         self.wait(for: [expectation], timeout: timeout)
     }
     
-    func assertPromiseIsPending<Value>(_ promise: FailablePromise<Value>, file: StaticString = #file, line: UInt = #line) {
-        var flag = false
-        
-        promise.always {
-            XCTAssert(flag, file: file, line: line)
+    func wait(_ duration: TimeInterval = 1) {
+        testExpectation(timeout: duration + 1) { fulfill in
+            delay(duration) {
+                fulfill()
+            }
         }
-        
-        flag = true
+    }
+}
+
+extension Promise {
+    var value: Value? {
+        var value: Value?
+        then { value = $0 }
+        return value
+    }
+    
+    func assertIsPending(file: StaticString = #file, line: UInt = #line) {
+        XCTAssertNil(value, file: file, line: line)
+    }
+    
+    func assertIsFulfilled(file: StaticString = #file, line: UInt = #line) {
+        XCTAssertNotNil(value, file: file, line: line)
+    }
+}
+
+extension Promise where Value: Equatable {
+    func assertValue(_ value: Value, file: StaticString = #file, line: UInt = #line) {
+        XCTAssertEqual(value, self.value, file: file, line: line)
+    }
+}
+
+extension FailablePromise {
+    var value: Value? {
+        var value: Value?
+        then { value = $0 }
+        return value
+    }
+    
+    var error: Error? {
+        var error: Error?
+        `catch` { error = $0 }
+        return error
+    }
+    
+    func assertIsPending(file: StaticString = #file, line: UInt = #line) {
+        XCTAssertNil(value, file: file, line: line)
+        XCTAssertNil(error, file: file, line: line)
+    }
+    
+    func assertIsFulfilled(file: StaticString = #file, line: UInt = #line) {
+        XCTAssertNotNil(value, file: file, line: line)
+    }
+    
+    func assertIsRejected(file: StaticString = #file, line: UInt = #line) {
+        XCTAssertNotNil(error, file: file, line: line)
+    }
+}
+
+extension FailablePromise where Value: Equatable {
+    func assertValue(_ value: Value, file: StaticString = #file, line: UInt = #line) {
+        XCTAssertEqual(value, self.value, file: file, line: line)
     }
 }
 
