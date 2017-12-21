@@ -33,11 +33,11 @@ public extension Promise {
             other.then(fulfill)
         }
     }
-    
-    func zipped<T>(with other: Promise<T>) -> Promise<(Value, T)> {
-        return flatMap { x in
-            other.map { y in (x, y) }
-        }
+}
+
+public func zip<A, B>(_ left: Promise<A>, _ right: Promise<B>) -> Promise<(A, B)> {
+    return left.flatMap { x in
+        right.map { y in (x, y) }
     }
 }
 
@@ -55,9 +55,9 @@ public protocol _Promise {
 
 public extension Collection where Element: _Promise {
     func all() -> Promise<[Element.Value]> {
-        return reduce(.fulfilled(with: []), {
-            $0.zipped(with: $1._promise).map { $0 + [$1] }
-        })
+        return reduce(.fulfilled(with: [])) {
+            zip($0, $1._promise).map { $0 + [$1] }
+        }
     }
     
     func race() -> Promise<Element.Value> {

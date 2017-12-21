@@ -52,12 +52,6 @@ public extension FailablePromise {
         }
     }
     
-    func zipped<T>(with other: FailablePromise<T>) -> FailablePromise<(Value, T)> {
-        return flatMap { x in
-            other.map { y in (x, y) }
-        }
-    }
-    
     func recover(recovery: @escaping (Error) throws -> FailablePromise) -> FailablePromise {
         return FailablePromise { fulfill, reject in
             then(fulfill)
@@ -92,6 +86,12 @@ public extension FailablePromise {
     }
 }
 
+public func zip<A, B>(_ left: FailablePromise<A>, _ right: FailablePromise<B>) -> FailablePromise<(A, B)> {
+    return left.flatMap { x in
+        right.map { y in (x, y) }
+    }
+}
+
 public extension FailablePromise where Value == Void {
     static var fulfilled: FailablePromise {
         return .fulfilled(with: ())
@@ -112,9 +112,9 @@ public extension Collection where Element: _FailablePromise {
     /// Wait for all the promises you give it to fulfill, and once they have, fulfill itself
     /// with the array of all fulfilled values. Preserves the order of the promises.
     func all() -> FailablePromise<[Element.Value]> {
-        return reduce(.fulfilled(with: []), {
-            return $0.zipped(with: $1._promise).map { return $0 + [$1] }
-        })
+        return reduce(.fulfilled(with: [])) {
+            return zip($0, $1._promise).map { return $0 + [$1] }
+        }
     }
     
     /// Fulfills or rejects with the first promise that completes
