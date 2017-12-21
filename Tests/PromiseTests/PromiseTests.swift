@@ -52,36 +52,22 @@ final class PromiseTests: XCTestCase {
         }
     }
     
-    func testThenWhenPending() {
-        let promise = FailablePromise<Void>.pending
-        
-        testExpectation { fulfillExpectation in
-            promise.then {
-                XCTFail()
-            }
-
-            delay(0.05) {
-                fulfillExpectation()
-            }
-        }
-    }
-    
     func testPending() {
         let promise = FailablePromise<Void>.pending
         
-        testExpectation { fulfillExpectation in
-            promise.then {
-                XCTFail()
-            }
-            
-            promise.catch { _ in
-                XCTFail()
-            }
-            
-            delay(0.5) {
-                fulfillExpectation()
-            }
+        promise.then {
+            XCTFail()
         }
+        
+        promise.catch { _ in
+            XCTFail()
+        }
+        
+        promise.always {
+            XCTFail()
+        }
+        
+        wait(0.5)
     }
     
     func testFulfilled() {
@@ -142,12 +128,7 @@ final class PromiseTests: XCTestCase {
             fulfill(false)
         }
 
-        testExpectation { fulfillExpectation in
-            promise.then { value in
-                XCTAssert(value)
-                fulfillExpectation()
-            }
-        }
+        promise.assertValue(true)
     }
     
     func testRejectThenResolve() {
@@ -156,11 +137,7 @@ final class PromiseTests: XCTestCase {
             fulfill(())
         }
         
-        testExpectation { fulfillExpectation in
-            promise.catch { _ in
-                fulfillExpectation()
-            }
-        }
+        promise.assertIsRejected()
     }
     
     func testDoubleReject() {
@@ -169,11 +146,7 @@ final class PromiseTests: XCTestCase {
             reject(SimpleError())
         }
         
-        testExpectation { fulfillExpectation in
-            promise.catch { _ in
-                fulfillExpectation()
-            }
-        }
+        promise.assertIsRejected()
     }
 
     func testResolveThenReject() {
@@ -182,10 +155,6 @@ final class PromiseTests: XCTestCase {
             reject(SimpleError())
         }
         
-        testExpectation { fulfillExpectation in
-            promise.then {
-                fulfillExpectation()
-            }
-        }
+        promise.assertIsFulfilled()
     }
 }
