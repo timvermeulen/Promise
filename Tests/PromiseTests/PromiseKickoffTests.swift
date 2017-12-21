@@ -3,7 +3,7 @@ import Promise
 
 final class PromiseKickoffTests: XCTestCase {
     func testKickoff() {
-        let promise = FailablePromise.kickoff {}
+        let promise = FailablePromise {}
         
         testExpectation { fulfillExpectation in
             promise.then {
@@ -13,7 +13,7 @@ final class PromiseKickoffTests: XCTestCase {
     }
     
     func testFailingKickoff() {
-        let promise = FailablePromise.kickoff {
+        let promise = FailablePromise {
             throw SimpleError()
         }
         

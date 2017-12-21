@@ -1,28 +1,24 @@
 public extension FailablePromise {
-    static var pending: FailablePromise {
-        return FailablePromise()
-    }
-    
-    static func fulfilled(with value: Value) -> FailablePromise {
-        return FailablePromise { fulfill, _ in
-            fulfill(value)
-        }
-    }
-    
-    static func rejected(with error: Error) -> FailablePromise {
-        return FailablePromise { _, reject in
-            reject(error)
-        }
-    }
-    
-    static func kickoff(_ block: @escaping () throws -> Value) -> FailablePromise {
-        return FailablePromise { fulfill, reject in
+    convenience init(_ block: () throws -> Value) {
+        self.init { fulfill, reject in
             do {
                 fulfill(try block())
             } catch {
                 reject(error)
             }
         }
+    }
+    
+    static var pending: FailablePromise {
+        return FailablePromise()
+    }
+    
+    static func fulfilled(with value: Value) -> FailablePromise {
+        return FailablePromise { value }
+    }
+    
+    static func rejected(with error: Error) -> FailablePromise {
+        return FailablePromise { throw error }
     }
     
     func map<T>(_ transform: @escaping (Value) throws -> T) -> FailablePromise<T> {

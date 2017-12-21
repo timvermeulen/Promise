@@ -1,6 +1,10 @@
 public extension Promise {
+    convenience init(_ block: () -> Value) {
+        self.init { $0(block()) }
+    }
+    
     static func fulfilled(with value: Value) -> Promise {
-        return Promise { $0(value) }
+        return Promise { value }
     }
     
     static var pending: Promise {

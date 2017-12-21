@@ -6,9 +6,7 @@ final class PromiseRecoverTests: XCTestCase {
         let promise = FailablePromise<Void>.rejected(with: SimpleError()).delayed(by: 0.1)
         
         let recovered = promise.recover { _ in
-            return FailablePromise { fulfill, _ in
-                fulfill(())
-            }
+            return FailablePromise {}
         }
         
         testExpectation { fulfillExpectation in
@@ -80,9 +78,7 @@ final class PromiseRecoverTests: XCTestCase {
         let promise = FailablePromise.fulfilled(with: true)
         
         let recovered = promise.recover { _ in
-            return FailablePromise { fulfill, _ in
-                fulfill(false)
-            }
+            return FailablePromise { false }
         }
         
         testExpectation { fulfillExpectation in

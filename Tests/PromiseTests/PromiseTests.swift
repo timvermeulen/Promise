@@ -25,9 +25,7 @@ final class PromiseTests: XCTestCase {
     }
 
     func testThrowing() {
-        let promise = FailablePromise<Void> { _, _ in
-            throw SimpleError()
-        }
+        let promise = FailablePromise<Void> { throw SimpleError() }
         
         testExpectation { fulfillExpectation in
             promise.then {
@@ -87,7 +85,7 @@ final class PromiseTests: XCTestCase {
     }
     
     func testFulfilled() {
-        let (promise, fulfill, _) = FailablePromise<Void>.makePromise()
+        let (promise, fulfill, _) = FailablePromise<Void>.make()
         
         testExpectation() { fulfillExpectation in
             fulfill(())
@@ -99,7 +97,7 @@ final class PromiseTests: XCTestCase {
     }
     
     func testRejected() {
-        let (promise, _, reject) = FailablePromise<Void>.makePromise()
+        let (promise, _, reject) = FailablePromise<Void>.make()
 
         testExpectation { fulfillExpectation in
             promise.catch { _ in
@@ -143,7 +141,7 @@ final class PromiseTests: XCTestCase {
             fulfill(true)
             fulfill(false)
         }
-        
+
         testExpectation { fulfillExpectation in
             promise.then { value in
                 XCTAssert(value)
@@ -164,7 +162,7 @@ final class PromiseTests: XCTestCase {
             }
         }
     }
-
+    
     func testDoubleReject() {
         let promise = FailablePromise<Void> { _, reject in
             reject(SimpleError())
@@ -187,10 +185,6 @@ final class PromiseTests: XCTestCase {
         testExpectation { fulfillExpectation in
             promise.then {
                 fulfillExpectation()
-            }
-            
-            promise.catch { _ in
-                XCTFail()
             }
         }
     }

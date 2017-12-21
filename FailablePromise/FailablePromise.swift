@@ -21,7 +21,7 @@ public extension FailablePromise {
         }
     }
     
-    static func makePromise() -> (promise: FailablePromise, fulfill: (Value) -> Void, reject: (Error) -> Void) {
+    static func make() -> (promise: FailablePromise, fulfill: (Value) -> Void, reject: (Error) -> Void) {
         let promise = FailablePromise()
         return (promise, promise.fulfill, promise.reject)
     }

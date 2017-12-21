@@ -1,5 +1,5 @@
 public final class Promise<Value> {
-    private var state = Atomic(State.pending(callbacks: []))
+    private let state = Atomic(State.pending(callbacks: []))
 }
 
 private extension Promise {
@@ -9,7 +9,7 @@ private extension Promise {
     }
     
     func fulfill(with value: Value) {
-        let callbacks: [(Value) -> Void]? = state.mutate { state in
+        let callbacks: [(Value) -> Void]? = state.access { state in
             guard case .pending(let callbacks) = state else { return nil }
             
             state = .fulfilled(with: value)
@@ -32,7 +32,7 @@ public extension Promise {
     }
     
     func then(_ callback: @escaping (Value) -> Void) {
-        let value: Value? = state.mutate { state in
+        let value: Value? = state.access { state in
             switch state {
             case .pending(var callbacks):
                 callbacks.append(callback)

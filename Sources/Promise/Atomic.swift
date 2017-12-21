@@ -1,6 +1,6 @@
 import Foundation
 
-struct Atomic<Value> {
+final class Atomic<Value> {
     private var _value: Value
     private let queue: DispatchQueue
     
@@ -11,11 +11,11 @@ struct Atomic<Value> {
 }
 
 extension Atomic {
-    var value: Value {
-        return queue.sync { _value }
+    func access<T>(_ block: (inout Value) -> T) -> T {
+        return queue.sync { block(&_value) }
     }
     
-    mutating func mutate<T>(_ mutate: (inout Value) -> T) -> T {
-        return queue.sync { mutate(&_value) }
+    var value: Value {
+        return access { $0 }
     }
 }
