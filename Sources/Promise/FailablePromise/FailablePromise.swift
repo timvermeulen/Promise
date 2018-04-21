@@ -1,12 +1,19 @@
-import Foundation
-
 public final class FailablePromise<Value> {
-    private let (valuePromise, fulfill) = Promise<Value>.make()
-    private let (errorPromise, reject) = Promise<Error>.make()
+    private let fulfill: (Value) -> Void
+    private let reject: (Error) -> Void
     private let resultPromise: Promise<Result<Value>>
     
     init() {
-        resultPromise = valuePromise.map(Result.success).racing(with: errorPromise.map(Result.failure))
+        let (valuePromise, fulfill) = Promise<Value>.make()
+        let (errorPromise, reject) = Promise<Error>.make()
+        
+        resultPromise = race(
+            valuePromise.map(Result.success),
+            errorPromise.map(Result.failure)
+        )
+        
+        self.fulfill = fulfill
+        self.reject = reject
     }
 }
 

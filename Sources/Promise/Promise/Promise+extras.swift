@@ -11,27 +11,29 @@ public extension Promise {
         return Promise()
     }
     
-    func map<T>(_ transform: @escaping (Value) -> T) -> Promise<T> {
+    func transform<T>(_ transform: @escaping (@escaping (T) -> Void, Value) -> Void) -> Promise<T> {
         return .init { fulfill in
-            then { value in
-                fulfill(transform(value))
-            }
+            then { value in transform(fulfill, value) }
+        }
+    }
+    
+    func map<T>(_ transform: @escaping (Value) -> T) -> Promise<T> {
+        return self.transform { fulfill, value in
+            fulfill(transform(value))
         }
     }
     
     func flatMap<T>(_ transform: @escaping (Value) -> Promise<T>) -> Promise<T> {
-        return .init { fulfill in
-            then { value in
-                transform(value).then(fulfill)
-            }
+        return self.transform { fulfill, value in
+            transform(value).then(fulfill)
         }
     }
-    
-    func racing(with other: Promise) -> Promise {
-        return Promise { fulfill in
-            then(fulfill)
-            other.then(fulfill)
-        }
+}
+
+func race<T>(_ left: Promise<T>, _ right: Promise<T>) -> Promise<T> {
+    return Promise { fulfill in
+        left.then(fulfill)
+        right.then(fulfill)
     }
 }
 
@@ -47,10 +49,13 @@ public extension Promise where Value == Void {
     }
 }
 
-// TODO: remove this protocol once we have generic extensions
 public protocol _Promise {
     associatedtype Value
     var _promise: Promise<Value> { get }
+}
+
+private func _race<T>(_ left: Promise<T>, _ right: Promise<T>) -> Promise<T> {
+    return race(left, right)
 }
 
 public extension Collection where Element: _Promise {
@@ -61,6 +66,6 @@ public extension Collection where Element: _Promise {
     }
     
     func race() -> Promise<Element.Value> {
-        return reduce(.pending, { $0.racing(with: $1._promise) })
+        return reduce(.pending, { _race($0, $1._promise) })
     }
 }

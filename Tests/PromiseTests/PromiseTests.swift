@@ -16,7 +16,7 @@ final class PromiseTests: XCTestCase {
     
     func testAsync() {
         testExpectation { fulfillExpectation in
-            let promise = FailablePromise.fulfilled.delayed(by: 0.05)
+            let promise = FailablePromise.fulfilled.delayed(by: 0.05, on: .main)
 
             promise.then {
                 fulfillExpectation()
@@ -39,7 +39,7 @@ final class PromiseTests: XCTestCase {
     }
     
     func testAsyncRejection() {
-        let promise = FailablePromise<Void>.rejected(with: SimpleError()).delayed(by: 0.05)
+        let promise = FailablePromise<Void>.rejected(with: SimpleError()).delayed(by: 0.05, on: .main)
         
         testExpectation { fulfillExpectation in
             promise.then {
@@ -108,10 +108,10 @@ final class PromiseTests: XCTestCase {
     }
     
     func testFlatMap() {
-        let promise1 = FailablePromise.fulfilled(with: "hello").delayed(by: 0.05)
+        let promise1 = FailablePromise.fulfilled(with: "hello").delayed(by: 0.05, on: .main)
 
         let promise2 = promise1.flatMap { value in
-            FailablePromise.fulfilled(with: value.count).delayed(by: 0.05)
+            FailablePromise.fulfilled(with: value.count).delayed(by: 0.05, on: .main)
         }
 
         testExpectation { fulfillExpectation in

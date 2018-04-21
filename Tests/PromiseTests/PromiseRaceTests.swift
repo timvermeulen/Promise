@@ -3,9 +3,9 @@ import Promise
 
 final class PromiseRaceTests: XCTestCase {
     func testRace() {
-        let promise1 = FailablePromise.fulfilled(with: 1).delayed(by: 2 / 4)
-        let promise2 = FailablePromise.fulfilled(with: 2).delayed(by: 1 / 4)
-        let promise3 = FailablePromise.fulfilled(with: 3).delayed(by: 3 / 4)
+        let promise1 = FailablePromise.fulfilled(with: 1).delayed(by: 2 / 4, on: .main)
+        let promise2 = FailablePromise.fulfilled(with: 2).delayed(by: 1 / 4, on: .main)
+        let promise3 = FailablePromise.fulfilled(with: 3).delayed(by: 3 / 4, on: .main)
         
         let final = [promise1, promise2, promise3].race()
         
@@ -18,10 +18,10 @@ final class PromiseRaceTests: XCTestCase {
     }
     
     func testRaceFailure() {
-        let promise1 = FailablePromise<Void>.rejected(with: SimpleError()).delayed(by: 1 / 3)
-        let promise2 = FailablePromise.fulfilled.delayed(by: 2 / 3)
+        let promise1 = FailablePromise<Void>.rejected(with: SimpleError()).delayed(by: 1 / 3, on: .main)
+        let promise2 = FailablePromise.fulfilled.delayed(by: 2 / 3, on: .main)
         
-        let final = promise1.racing(with: promise2)
+        let final = race(promise1, promise2)
         
         testExpectation { fulfillExpectation in
             final.catch { _ in
@@ -32,9 +32,9 @@ final class PromiseRaceTests: XCTestCase {
     
     func testInstantResolve() {
         let promise1 = FailablePromise.fulfilled(with: true)
-        let promise2 = FailablePromise.fulfilled(with: false).delayed(by: 0.5)
+        let promise2 = FailablePromise.fulfilled(with: false).delayed(by: 0.5, on: .main)
         
-        let final = promise1.racing(with: promise2)
+        let final = race(promise1, promise2)
         
         testExpectation { fulfillExpectation in
             final.then { value in
@@ -46,9 +46,9 @@ final class PromiseRaceTests: XCTestCase {
     
     func testInstantReject() {
         let promise1 = FailablePromise<Void>.rejected(with: SimpleError())
-        let promise2 = FailablePromise.fulfilled.delayed(by: 0.5)
+        let promise2 = FailablePromise.fulfilled.delayed(by: 0.5, on: .main)
         
-        let final = [promise1, promise2].race()
+        let final = race(promise1, promise2)
         
         testExpectation { fulfillExpectation in
             final.catch { _ in

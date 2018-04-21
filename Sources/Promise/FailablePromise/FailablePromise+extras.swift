@@ -68,21 +68,21 @@ public extension FailablePromise {
         }
     }
     
-    func `guard`(orFailWith error: Error, _ predicate: @escaping (Value) -> Bool) -> FailablePromise {
+    func `guard`(_ block: @escaping (Value) throws -> Void) -> FailablePromise {
         return map { value in
-            guard predicate(value) else { throw error }
+            try block(value)
             return value
         }
     }
-    
-    func racing(with other: FailablePromise) -> FailablePromise {
-        return FailablePromise { fulfill, reject in
-            then(fulfill)
-            `catch`(reject)
-            
-            other.then(fulfill)
-            other.catch(reject)
-        }
+}
+
+public func race<T>(_ left: FailablePromise<T>, _ right: FailablePromise<T>) -> FailablePromise<T> {
+    return FailablePromise { fulfill, reject in
+        left.then(fulfill)
+        left.catch(reject)
+        
+        right.then(fulfill)
+        right.catch(reject)
     }
 }
 
@@ -98,7 +98,6 @@ public extension FailablePromise where Value == Void {
     }
 }
 
-// TODO: remove this protocol once we have generic extensions
 public protocol _FailablePromise {
     associatedtype Value
     var _promise: FailablePromise<Value> { get }
@@ -106,6 +105,10 @@ public protocol _FailablePromise {
 
 extension FailablePromise: _FailablePromise {
     public var _promise: FailablePromise { return self }
+}
+
+private func _race<T>(_ left: FailablePromise<T>, _ right: FailablePromise<T>) -> FailablePromise<T> {
+    return race(left, right)
 }
 
 public extension Collection where Element: _FailablePromise {
@@ -120,6 +123,6 @@ public extension Collection where Element: _FailablePromise {
     /// Fulfills or rejects with the first promise that completes
     /// (as opposed to waiting for all of them, like `.all` does).
     func race() -> FailablePromise<Element.Value> {
-        return reduce(.pending, { $0.racing(with: $1._promise) })
+        return reduce(.pending, { _race($0, $1._promise) })
     }
 }

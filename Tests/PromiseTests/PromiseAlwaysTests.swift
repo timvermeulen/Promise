@@ -3,7 +3,7 @@ import Promise
 
 final class PromiseAlwaysTests: XCTestCase {
     func testAlways() {
-        let promise = FailablePromise.fulfilled.delayed(by: 0.5)
+        let promise = FailablePromise.fulfilled.delayed(by: 0.5, on: .main)
         
         testExpectation { fulfillExpectation in
             promise.always {
@@ -13,7 +13,7 @@ final class PromiseAlwaysTests: XCTestCase {
     }
     
     func testAlwaysRejects() {
-        let promise = FailablePromise<Void>.rejected(with: SimpleError()).delayed(by: 0.5)
+        let promise = FailablePromise<Void>.rejected(with: SimpleError()).delayed(by: 0.5, on: .main)
         
         testExpectation { fulfillExpectation in
             promise.always {

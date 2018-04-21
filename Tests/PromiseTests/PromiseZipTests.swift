@@ -13,8 +13,8 @@ final class PromiseZipTests: XCTestCase {
     }
 
     func testAsyncZip() {
-        let promise1 = FailablePromise.fulfilled.delayed(by: 1 / 3)
-        let promise2 = FailablePromise.fulfilled.delayed(by: 2 / 3)
+        let promise1 = FailablePromise.fulfilled.delayed(by: 1 / 3, on: .main)
+        let promise2 = FailablePromise.fulfilled.delayed(by: 2 / 3, on: .main)
 
         let zipped = zip(promise1, promise2)
         

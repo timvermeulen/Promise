@@ -32,7 +32,7 @@ public extension Promise {
     }
     
     func then(_ callback: @escaping (Value) -> Void) {
-        let value: Value? = state.access { state in
+        let value = state.access { state -> Value? in
             switch state {
             case .pending(var callbacks):
                 callbacks.append(callback)
