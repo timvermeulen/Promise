@@ -5,22 +5,6 @@ public extension FailablePromise {
         return race(self, FailablePromise.rejected(with: error).delayed(by: delay, on: queue))
     }
     
-    func delayed(by delay: TimeInterval, on queue: DispatchQueue) -> FailablePromise {
-        return FailablePromise { fulfill, reject in
-            then { value in
-                queue.asyncAfter(deadline: .now() + delay) {
-                    fulfill(value)
-                }
-            }
-            
-            `catch` { error in
-                queue.asyncAfter(deadline: .now() + delay) {
-                    reject(error)
-                }
-            }
-        }
-    }
-    
     func sync(on queue: DispatchQueue) -> FailablePromise {
         return FailablePromise { fulfill, reject in
             then { value in
@@ -41,6 +25,34 @@ public extension FailablePromise {
             
             `catch` { error in
                 queue.async { reject(error) }
+            }
+        }
+    }
+    
+    func asyncAfter(deadline: DispatchTime, on queue: DispatchQueue) -> FailablePromise {
+        return FailablePromise { fulfill, reject in
+            then { value in
+                queue.asyncAfter(deadline: deadline) {
+                    fulfill(value)
+                }
+            }
+            
+            `catch` { error in
+                queue.asyncAfter(deadline: deadline) {
+                    reject(error)
+                }
+            }
+        }
+    }
+    
+    func delayed(by interval: TimeInterval, on queue: DispatchQueue) -> FailablePromise {
+        return FailablePromise { fulfill, reject in
+            then { value in
+                Timer.scheduledTimer(withTimeInterval: interval, repeats: false) { _ in fulfill(value) }
+            }
+            
+            `catch` { error in
+                Timer.scheduledTimer(withTimeInterval: interval, repeats: false) { _ in reject(error) }
             }
         }
     }
