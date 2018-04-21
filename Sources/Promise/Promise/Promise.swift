@@ -35,6 +35,7 @@ public extension Promise {
         let value = state.access { state -> Value? in
             switch state {
             case .pending(var callbacks):
+                state = .pending(callbacks: [])
                 callbacks.append(callback)
                 state = .pending(callbacks: callbacks)
                 return nil
