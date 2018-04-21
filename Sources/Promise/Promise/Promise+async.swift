@@ -21,7 +21,9 @@ public extension Promise {
     
     func delayed(by interval: TimeInterval, on queue: DispatchQueue) -> Promise {
         return transform { fulfill, value in
-            Timer.scheduledTimer(withTimeInterval: interval, repeats: false) { _ in fulfill(value) }
+            Timer.scheduledTimer(withTimeInterval: interval, repeats: false) { _ in
+                queue.async {fulfill(value) }
+            }
         }
     }
     
