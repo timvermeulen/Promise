@@ -48,11 +48,15 @@ public extension FailablePromise {
     func delayed(by interval: TimeInterval, on queue: DispatchQueue) -> FailablePromise {
         return FailablePromise { fulfill, reject in
             then { value in
-                Timer.scheduledTimer(withTimeInterval: interval, repeats: false) { _ in fulfill(value) }
+                Timer.scheduledTimer(withTimeInterval: interval, repeats: false) { _ in
+                    queue.async { fulfill(value) }
+                }
             }
             
             `catch` { error in
-                Timer.scheduledTimer(withTimeInterval: interval, repeats: false) { _ in reject(error) }
+                Timer.scheduledTimer(withTimeInterval: interval, repeats: false) { _ in
+                    queue.async { reject(error) }
+                }
             }
         }
     }
