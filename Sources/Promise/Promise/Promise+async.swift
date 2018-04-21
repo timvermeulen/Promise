@@ -25,12 +25,8 @@ public extension Promise {
         }
     }
     
-    func timed(withInterval interval: TimeInterval) -> Promise<(value: Value, beforeExpiry: Bool)> {
-        let timer = Promise<Void>.fulfilled.delayed(by: interval, on: .global())
-        
-        return race(
-            zip(self, timer).map { ($0.0, false) },
-            map { ($0, true) }
-        )
+    func timed() -> Promise<(value: Value, elapsedTime: TimeInterval)> {
+        let start = Date()
+        return map { ($0, Date().timeIntervalSince(start)) }
     }
 }

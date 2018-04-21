@@ -49,6 +49,7 @@ public extension Promise where Value == Void {
     }
 }
 
+// TODO: remove this protocol once we have generic extensions
 public protocol _Promise {
     associatedtype Value
     var _promise: Promise<Value> { get }

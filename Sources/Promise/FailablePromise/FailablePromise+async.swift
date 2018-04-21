@@ -57,12 +57,8 @@ public extension FailablePromise {
         }
     }
     
-    func timed(withInterval interval: TimeInterval) -> FailablePromise<(value: Value, beforeExpiry: Bool)> {
-        let timer = FailablePromise<Void>.fulfilled.delayed(by: interval, on: .global())
-        
-        return race(
-            zip(self, timer).map { ($0.0, false) },
-            map { ($0, true) }
-        )
+    func timed() -> FailablePromise<(value: Value, elapsedTime: TimeInterval)> {
+        let start = Date()
+        return map { ($0, Date().timeIntervalSince(start)) }
     }
 }
