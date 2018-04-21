@@ -1,19 +1,19 @@
 public final class FailablePromise<Value> {
     private let fulfill: (Value) -> Void
     private let reject: (Error) -> Void
-    private let resultPromise: Promise<Result<Value>>
+    private let result: Promise<Result<Value>>
     
     init() {
         let (valuePromise, fulfill) = Promise<Value>.make()
         let (errorPromise, reject) = Promise<Error>.make()
         
-        resultPromise = race(
+        self.fulfill = fulfill
+        self.reject = reject
+        
+        self.result = race(
             valuePromise.map(Result.success),
             errorPromise.map(Result.failure)
         )
-        
-        self.fulfill = fulfill
-        self.reject = reject
     }
 }
 
@@ -34,7 +34,7 @@ public extension FailablePromise {
     }
     
     func then(_ handler: @escaping (Value) -> Void) {
-        resultPromise.then { result in
+        result.then { result in
             if case .success(let value) = result {
                 handler(value)
             }
@@ -42,7 +42,7 @@ public extension FailablePromise {
     }
     
     func `catch`(_ handler: @escaping (Error) -> Void) {
-        resultPromise.then { result in
+        result.then { result in
             if case .failure(let error) = result {
                 handler(error)
             }
@@ -50,7 +50,7 @@ public extension FailablePromise {
     }
     
     func always(_ handler: @escaping () -> Void) {
-        resultPromise.then { _ in
+        result.then { _ in
             handler()
         }
     }
