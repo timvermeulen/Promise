@@ -1,13 +1,7 @@
 import Foundation
 
 public extension Promise {
-    func sync(on queue: DispatchQueue) -> Promise {
-        return transform { fulfill, value in
-            queue.sync { fulfill(value) }
-        }
-    }
-    
-    func async(on queue: DispatchQueue) -> Promise {
+    func on(_ queue: DispatchQueue) -> Promise {
         return transform { fulfill, value in
             queue.async { fulfill(value) }
         }

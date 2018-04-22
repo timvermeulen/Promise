@@ -5,19 +5,7 @@ public extension FailablePromise {
         return race(self, FailablePromise.rejected(with: error).delayed(by: delay, on: queue))
     }
     
-    func sync(on queue: DispatchQueue) -> FailablePromise {
-        return FailablePromise { fulfill, reject in
-            then { value in
-                queue.sync { fulfill(value) }
-            }
-            
-            `catch` { error in
-                queue.sync { reject(error) }
-            }
-        }
-    }
-    
-    func async(on queue: DispatchQueue) -> FailablePromise {
+    func on(_ queue: DispatchQueue) -> FailablePromise {
         return FailablePromise { fulfill, reject in
             then { value in
                 queue.async { fulfill(value) }
