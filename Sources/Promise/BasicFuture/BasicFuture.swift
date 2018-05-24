@@ -1,8 +1,34 @@
-public final class Promise<Value> {
-    private let state = Atomic(State.pending(callbacks: []))
+public final class BasicPromise<Value> {
+    public let future: BasicFuture<Value>
+    
+    fileprivate init(future: BasicFuture<Value>) {
+        self.future = future
+    }
+    
+    public init() {
+        future = .pending
+    }
+    
+    public func fulfill(with value: Value) {
+        future.fulfill(with: value)
+    }
 }
 
-private extension Promise {
+extension BasicPromise where Value == Void {
+    public func fulfill() {
+        fulfill(with: ())
+    }
+}
+
+public final class BasicFuture<Value> {
+    private let state: Atomic<State>
+    
+    private init() {
+        state = Atomic(.pending(callbacks: []))
+    }
+}
+
+private extension BasicFuture {
     indirect enum State {
         case pending(callbacks: [(Value) -> Void])
         case fulfilled(with: Value)
@@ -20,15 +46,14 @@ private extension Promise {
     }
 }
 
-public extension Promise {
-    convenience init(_ work: (_ fulfill: @escaping (Value) -> Void) -> Void) {
-        self.init()
-        work(fulfill)
+public extension BasicFuture {
+    static var pending: BasicFuture {
+        return BasicFuture()
     }
     
-    static func make() -> (promise: Promise, fulfill: (Value) -> Void) {
-        let promise = Promise()
-        return (promise, promise.fulfill)
+    convenience init(_ block: (BasicPromise<Value>) -> Void) {
+        self.init()
+        block(BasicPromise(future: self))
     }
     
     func then(_ callback: @escaping (Value) -> Void) {
@@ -39,6 +64,7 @@ public extension Promise {
                 callbacks.append(callback)
                 state = .pending(callbacks: callbacks)
                 return nil
+                
             case .fulfilled(let value):
                 return value
             }

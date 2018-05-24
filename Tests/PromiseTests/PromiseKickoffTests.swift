@@ -3,22 +3,22 @@ import Promise
 
 final class PromiseKickoffTests: XCTestCase {
     func testKickoff() {
-        let promise = FailablePromise {}
+        let future = Future {}
         
         testExpectation { fulfillExpectation in
-            promise.then {
+            future.then {
                 fulfillExpectation()
             }
         }
     }
     
     func testFailingKickoff() {
-        let promise = FailablePromise {
+        let future = Future {
             throw SimpleError()
         }
         
         testExpectation { fulfillExpectation in
-            promise.catch { _ in
+            future.catch { _ in
                 fulfillExpectation()
             }
         }

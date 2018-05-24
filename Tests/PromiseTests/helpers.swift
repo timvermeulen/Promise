@@ -17,7 +17,7 @@ extension XCTestCase {
     }
 }
 
-extension Promise {
+extension BasicFuture {
     var value: Value? {
         var value: Value?
         then { value = $0 }
@@ -33,13 +33,13 @@ extension Promise {
     }
 }
 
-extension Promise where Value: Equatable {
+extension BasicFuture where Value: Equatable {
     func assertValue(_ value: Value, file: StaticString = #file, line: UInt = #line) {
         XCTAssertEqual(value, self.value, file: file, line: line)
     }
 }
 
-extension FailablePromise {
+extension Future {
     var value: Value? {
         var value: Value?
         then { value = $0 }
@@ -66,7 +66,7 @@ extension FailablePromise {
     }
 }
 
-extension FailablePromise where Value: Equatable {
+extension Future where Value: Equatable {
     func assertValue(_ value: Value, file: StaticString = #file, line: UInt = #line) {
         XCTAssertEqual(value, self.value, file: file, line: line)
     }

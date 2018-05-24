@@ -3,10 +3,10 @@ import Promise
 
 final class PromiseRecoverTests: XCTestCase {
     func testRecover() {
-        let promise = FailablePromise<Void>.rejected(with: SimpleError()).delayed(by: 0.1, on: .main)
+        let future = Future<Void>.rejected(with: SimpleError()).delayed(by: 0.1, on: .main)
         
-        let recovered = promise.recover { _ in
-            return FailablePromise {}
+        let recovered = future.recover { _ in
+            return Future {}
         }
         
         testExpectation { fulfillExpectation in
@@ -17,9 +17,9 @@ final class PromiseRecoverTests: XCTestCase {
     }
     
     func testRecoverWithThrowingFunction() {
-        let promise = FailablePromise<Void>.rejected(with: SimpleError()).delayed(by: 0.1, on: .main)
+        let future = Future<Void>.rejected(with: SimpleError()).delayed(by: 0.1, on: .main)
         
-        let recovered = promise.recover { _ in
+        let recovered = future.recover { _ in
             _ = try JSONSerialization.data(withJSONObject: ["key": "value"])
             return .fulfilled
         }
@@ -32,9 +32,9 @@ final class PromiseRecoverTests: XCTestCase {
     }
     
     func testRecoverWithThrowingFunctionError() {
-        let promise = FailablePromise<Void>.rejected(with: SimpleError()).delayed(by: 0.1, on: .main)
+        let future = Future<Void>.rejected(with: SimpleError()).delayed(by: 0.1, on: .main)
         
-        let recovered = promise.recover { error -> FailablePromise<Void> in
+        let recovered = future.recover { error -> Future<Void> in
             throw SimpleError()
         }
         
@@ -46,9 +46,9 @@ final class PromiseRecoverTests: XCTestCase {
     }
     
     func testRecoverInstant() {
-        let promise = FailablePromise<Void>.rejected(with: SimpleError())
+        let future = Future<Void>.rejected(with: SimpleError())
         
-        let recovered = promise.recover { _ in
+        let recovered = future.recover { _ in
             return .fulfilled
         }
         
@@ -60,10 +60,10 @@ final class PromiseRecoverTests: XCTestCase {
     }
     
     func testIgnoreRecover() {
-        let promise = FailablePromise.fulfilled(with: true).delayed(by: 0.1, on: .main)
+        let future = Future.fulfilled(with: true).delayed(by: 0.1, on: .main)
         
-        let recovered = promise.recover { _ in
-            return FailablePromise.fulfilled(with: false)
+        let recovered = future.recover { _ in
+            return Future.fulfilled(with: false)
         }
         
         testExpectation { fulfillExpectation in
@@ -75,10 +75,10 @@ final class PromiseRecoverTests: XCTestCase {
     }
     
     func testIgnoreRecoverInstant() {
-        let promise = FailablePromise.fulfilled(with: true)
+        let future = Future.fulfilled(with: true)
         
-        let recovered = promise.recover { _ in
-            return FailablePromise.fulfilled(with: false)
+        let recovered = future.recover { _ in
+            return Future.fulfilled(with: false)
         }
         
         testExpectation { fulfillExpectation in

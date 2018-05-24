@@ -3,7 +3,7 @@ import Promise
 
 final class PromiseThrowsTests: XCTestCase {
     func testThrowsInMapping() {
-        let promise = FailablePromise.fulfilled(with: true).map { value -> Bool in
+        let future = Future.fulfilled(with: true).map { value -> Bool in
             if !value {
                 throw SimpleError()
             } else {
@@ -12,7 +12,7 @@ final class PromiseThrowsTests: XCTestCase {
         }
         
         testExpectation() { fulfillExpectation in
-            promise.then { value in
+            future.then { value in
                 XCTAssertFalse(value)
                 fulfillExpectation()
             }
@@ -20,7 +20,7 @@ final class PromiseThrowsTests: XCTestCase {
     }
     
     func testThrowsInMappingWithError() {
-        let promise = FailablePromise.fulfilled(with: true).map { value -> Bool in
+        let future = Future.fulfilled(with: true).map { value -> Bool in
             if value {
                 throw SimpleError()
             } else {
@@ -29,23 +29,23 @@ final class PromiseThrowsTests: XCTestCase {
         }
         
         testExpectation() { fulfillExpectation in
-            promise.catch { _ in
+            future.catch { _ in
                 fulfillExpectation()
             }
         }
     }
     
     func testThrowsInFlatmapping() {
-        let promise = FailablePromise.fulfilled(with: true).flatMap { value -> FailablePromise<Bool> in
+        let future = Future.fulfilled(with: true).flatMap { value -> Future<Bool> in
             if !value {
                 throw SimpleError()
             } else {
-                return FailablePromise.fulfilled(with: false)
+                return Future.fulfilled(with: false)
             }
         }
         
         testExpectation() { fulfillExpectation in
-            promise.then { value in
+            future.then { value in
                 XCTAssertFalse(value)
                 fulfillExpectation()
             }
@@ -53,16 +53,16 @@ final class PromiseThrowsTests: XCTestCase {
     }
     
     func testThrowsInFlatmappingWithError() {
-        let promise = FailablePromise.fulfilled(with: true).flatMap { value -> FailablePromise<Bool> in
+        let future = Future.fulfilled(with: true).flatMap { value -> Future<Bool> in
             if value {
                 throw SimpleError()
             } else {
-                return FailablePromise.fulfilled(with: false)
+                return Future.fulfilled(with: false)
             }
         }
         
         testExpectation() { fulfillExpectation in
-            promise.catch { _ in
+            future.catch { _ in
                 fulfillExpectation()
             }
         }

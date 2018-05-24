@@ -3,40 +3,40 @@ import Promise
 
 final class PromiseAlwaysTests: XCTestCase {
     func testAlways() {
-        let promise = FailablePromise.fulfilled.delayed(by: 0.5, on: .main)
+        let future = Future.fulfilled.delayed(by: 0.5, on: .main)
         
         testExpectation { fulfillExpectation in
-            promise.always {
+            future.always {
                 fulfillExpectation()
             }
         }
     }
     
     func testAlwaysRejects() {
-        let promise = FailablePromise<Void>.rejected(with: SimpleError()).delayed(by: 0.5, on: .main)
+        let future = Future<Void>.rejected(with: SimpleError()).delayed(by: 0.5, on: .main)
         
         testExpectation { fulfillExpectation in
-            promise.always {
+            future.always {
                 fulfillExpectation()
             }
         }
     }
     
     func testAlwaysInstantFulfill() {
-        let promise = FailablePromise.fulfilled
+        let future = Future.fulfilled
         
         testExpectation { fulfillExpectation in
-            promise.always {
+            future.always {
                 fulfillExpectation()
             }
         }
     }
     
     func testAlwaysInstantReject() {
-        let promise = FailablePromise<Void>.rejected(with: SimpleError())
+        let future = Future<Void>.rejected(with: SimpleError())
         
         testExpectation { fulfillExpectation in
-            promise.always {
+            future.always {
                 fulfillExpectation()
             }
         }

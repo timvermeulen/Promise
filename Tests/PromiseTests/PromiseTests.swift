@@ -4,9 +4,9 @@ import Promise
 final class PromiseTests: XCTestCase {
     func testThen() {
         var flag = false
-        let promise = FailablePromise.fulfilled
+        let future = Future.fulfilled
         
-        promise.then {
+        future.then {
             XCTAssertFalse(flag)
             flag = true
         }
@@ -16,54 +16,54 @@ final class PromiseTests: XCTestCase {
     
     func testAsync() {
         testExpectation { fulfillExpectation in
-            let promise = FailablePromise.fulfilled.delayed(by: 0.05, on: .main)
+            let future = Future.fulfilled.delayed(by: 0.05, on: .main)
 
-            promise.then {
+            future.then {
                 fulfillExpectation()
             }
         }
     }
 
     func testThrowing() {
-        let promise = FailablePromise<Void> { throw SimpleError() }
+        let future = Future<Void> { throw SimpleError() }
         
         testExpectation { fulfillExpectation in
-            promise.then {
+            future.then {
                 XCTFail()
             }
             
-            promise.catch { error in
+            future.catch { error in
                 fulfillExpectation()
             }
         }
     }
     
     func testAsyncRejection() {
-        let promise = FailablePromise<Void>.rejected(with: SimpleError()).delayed(by: 0.05, on: .main)
+        let future = Future<Void>.rejected(with: SimpleError()).delayed(by: 0.05, on: .main)
         
         testExpectation { fulfillExpectation in
-            promise.then {
+            future.then {
                 XCTFail()
             }
 
-            promise.catch { error in
+            future.catch { error in
                 fulfillExpectation()
             }
         }
     }
     
     func testPending() {
-        let promise = FailablePromise<Void>.pending
+        let future = Future<Void>.pending
         
-        promise.then {
+        future.then {
             XCTFail()
         }
         
-        promise.catch { _ in
+        future.catch { _ in
             XCTFail()
         }
         
-        promise.always {
+        future.always {
             XCTFail()
         }
         
@@ -71,36 +71,36 @@ final class PromiseTests: XCTestCase {
     }
     
     func testFulfilled() {
-        let (promise, fulfill, _) = FailablePromise<Void>.make()
+        let promise = Promise<Void>()
         
         testExpectation() { fulfillExpectation in
-            fulfill(())
+            promise.fulfill()
 
-            promise.then {
+            promise.future.then {
                 fulfillExpectation()
             }
         }
     }
     
     func testRejected() {
-        let (promise, _, reject) = FailablePromise<Void>.make()
+        let promise = Promise<Void>()
 
         testExpectation { fulfillExpectation in
-            promise.catch { _ in
+            promise.future.catch { _ in
                 fulfillExpectation()
             }
 
-            reject(SimpleError())
+            promise.reject(with: SimpleError())
         }
     }
     
     func testMap() {
-        let promise = FailablePromise.fulfilled(with: "someString")
+        let future = Future.fulfilled(with: "someString")
             .map { $0.count }
             .map { $0 * 2 }
         
         testExpectation() { fulfillExpectation in
-            promise.then { value in
+            future.then { value in
                 XCTAssertEqual(value, 20)
                 fulfillExpectation()
             }
@@ -108,14 +108,14 @@ final class PromiseTests: XCTestCase {
     }
     
     func testFlatMap() {
-        let promise1 = FailablePromise.fulfilled(with: "hello").delayed(by: 0.05, on: .main)
+        let future1 = Future.fulfilled(with: "hello").delayed(by: 0.05, on: .main)
 
-        let promise2 = promise1.flatMap { value in
-            FailablePromise.fulfilled(with: value.count).delayed(by: 0.05, on: .main)
+        let future2 = future1.flatMap { value in
+            Future.fulfilled(with: value.count).delayed(by: 0.05, on: .main)
         }
 
         testExpectation { fulfillExpectation in
-            promise2.then { value in
+            future2.then { value in
                 XCTAssertEqual(value, 5)
                 fulfillExpectation()
             }
@@ -123,38 +123,38 @@ final class PromiseTests: XCTestCase {
     }
 
     func testDoubleResolve() {
-        let promise = FailablePromise<Bool> { fulfill, _ in
-            fulfill(true)
-            fulfill(false)
+        let future = Future<Bool> { promise in
+            promise.fulfill(with: true)
+            promise.fulfill(with: false)
         }
 
-        promise.assertValue(true)
+        future.assertValue(true)
     }
     
     func testRejectThenResolve() {
-        let promise = FailablePromise<Void> { fulfill, reject in
-            reject(SimpleError())
-            fulfill(())
+        let future = Future<Void> { promise in
+            promise.reject(with: SimpleError())
+            promise.fulfill()
         }
         
-        promise.assertIsRejected()
+        future.assertIsRejected()
     }
     
     func testDoubleReject() {
-        let promise = FailablePromise<Void> { _, reject in
-            reject(SimpleError())
-            reject(SimpleError())
+        let future = Future<Void> { promise in
+            promise.reject(with: SimpleError())
+            promise.reject(with: SimpleError())
         }
         
-        promise.assertIsRejected()
+        future.assertIsRejected()
     }
 
     func testResolveThenReject() {
-        let promise = FailablePromise<Void> { fulfill, reject in
-            fulfill(())
-            reject(SimpleError())
+        let future = Future<Void> { promise in
+            promise.fulfill()
+            promise.reject(with: SimpleError())
         }
         
-        promise.assertIsFulfilled()
+        future.assertIsFulfilled()
     }
 }
