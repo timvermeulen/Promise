@@ -4,16 +4,18 @@ public final class Promise<Value> {
     fileprivate init(future: Future<Value>) {
         self.future = future
     }
-    
-    public init() {
-        future = .pending
+}
+
+public extension Promise {
+    convenience init() {
+        self.init(future: .pending)
     }
     
-    public func fulfill(with value: Value) {
+    func fulfill(with value: Value) {
         future.value.fulfill(with: value)
     }
     
-    public func reject(with error: Error) {
+    func reject(with error: Error) {
         future.error.fulfill(with: error)
     }
 }

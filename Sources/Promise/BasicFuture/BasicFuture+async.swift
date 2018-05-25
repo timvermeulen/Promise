@@ -1,6 +1,12 @@
 import Foundation
 
 public extension BasicFuture {
+    convenience init(asyncOn queue: DispatchQueue, _ block: @escaping () -> Value) {
+        self.init { promise in
+            queue.async { promise.fulfill(with: block()) }
+        }
+    }
+    
     func on(_ queue: DispatchQueue) -> BasicFuture {
         return transform { promise, value in
             queue.async { promise.fulfill(with: value) }

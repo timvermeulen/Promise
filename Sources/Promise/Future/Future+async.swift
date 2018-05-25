@@ -1,6 +1,18 @@
 import Foundation
 
 public extension Future {
+    convenience init(asyncOn queue: DispatchQueue, _ block: @escaping () throws -> Value) {
+        self.init { promise in
+            queue.async {
+                do {
+                    promise.fulfill(with: try block())
+                } catch {
+                    promise.reject(with: error)
+                }
+            }
+        }
+    }
+    
     func timedOut(after delay: TimeInterval, withError error: Error, on queue: DispatchQueue) -> Future {
         return race(self, Future.rejected(with: error).delayed(by: delay, on: queue))
     }

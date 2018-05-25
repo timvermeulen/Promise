@@ -4,12 +4,14 @@ public final class BasicPromise<Value> {
     fileprivate init(future: BasicFuture<Value>) {
         self.future = future
     }
-    
-    public init() {
-        future = .pending
+}
+
+public extension BasicPromise {
+    convenience init() {
+        self.init(future: .pending)
     }
     
-    public func fulfill(with value: Value) {
+    func fulfill(with value: Value) {
         future.fulfill(with: value)
     }
 }
@@ -29,7 +31,7 @@ public final class BasicFuture<Value> {
 }
 
 private extension BasicFuture {
-    indirect enum State {
+    enum State {
         case pending(callbacks: [(Value) -> Void])
         case fulfilled(with: Value)
     }

@@ -45,7 +45,7 @@ public extension BasicFuture where Value == Void {
     }
 }
 
-// TODO: remove this protocol once we have generic extensions
+// TODO: remove this protocol once we have parameterized extensions
 public protocol _Promise {
     associatedtype Value
     var _promise: BasicFuture<Value> { get }
