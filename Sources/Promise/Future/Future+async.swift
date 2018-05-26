@@ -4,10 +4,8 @@ public extension Future {
     convenience init(asyncOn queue: DispatchQueue, _ block: @escaping () throws -> Value) {
         self.init { promise in
             queue.async {
-                do {
+                promise.do {
                     promise.fulfill(with: try block())
-                } catch {
-                    promise.reject(with: error)
                 }
             }
         }

@@ -18,6 +18,14 @@ public extension Promise {
     func reject(with error: Error) {
         future.error.fulfill(with: error)
     }
+    
+    func `do`(_ block: () throws -> Void) {
+        do {
+            try block()
+        } catch {
+            reject(with: error)
+        }
+    }
 }
 
 extension Promise where Value == Void {
@@ -60,10 +68,8 @@ public extension Future {
         self.init()
         let promise = Promise(future: self)
         
-        do {
+        promise.do {
             try block(promise)
-        } catch {
-            promise.reject(with: error)
         }
     }
     

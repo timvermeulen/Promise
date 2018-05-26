@@ -1,10 +1,8 @@
 public extension Future {
     convenience init(_ block: () throws -> Value) {
         self.init { promise in
-            do {
+            promise.do {
                 promise.fulfill(with: try block())
-            } catch {
-                promise.reject(with: error)
             }
         }
     }
@@ -20,10 +18,8 @@ public extension Future {
     func transform<T>(_ transform: @escaping (Promise<T>, Value) throws -> Void) -> Future<T> {
         return .init { promise in
             then { value in
-                do {
+                promise.do {
                     try transform(promise, value)
-                } catch {
-                    promise.reject(with: error)
                 }
             }
             
@@ -51,10 +47,8 @@ public extension Future {
             then(promise.fulfill)
             
             `catch` { error in
-                do {
+                promise.do {
                     try transform(promise, error)
-                } catch {
-                    promise.reject(with: error)
                 }
             }
         }
