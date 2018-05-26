@@ -8,7 +8,7 @@ final class PromiseAllTests: XCTestCase {
         let future3 = Future.fulfilled(with: 3).delayed(by: 0.3)
         let future4 = Future.fulfilled(with: 4).delayed(by: 0.2)
         
-        let final = [future1, future2, future3, future4].all()
+        let final = [future1, future2, future3, future4].traverse()
         
         testExpectation { fulfillExpectation in
             final.then { value in
@@ -23,7 +23,7 @@ final class PromiseAllTests: XCTestCase {
         let future2 = Future.fulfilled(with: 2)
         let future3 = Future.fulfilled(with: 3)
         
-        let final = [future1, future2, future3].all()
+        let final = [future1, future2, future3].traverse()
         
         testExpectation { fulfillExpectation in
             final.then { value in
@@ -35,7 +35,7 @@ final class PromiseAllTests: XCTestCase {
     
     func testAllWithEmptyArray() {
         let promises: [Future<Void>] = []
-        let final = promises.all()
+        let final = promises.traverse()
         
         testExpectation { fulfillExpectation in
             final.then { value in
@@ -49,7 +49,7 @@ final class PromiseAllTests: XCTestCase {
         let future1 = Future.fulfilled
         let future2 = Future<Void>.rejected(with: SimpleError()).delayed(by: 0.5)
         
-        let final = [future1, future2].all()
+        let final = [future1, future2].traverse()
         
         testExpectation(description: "`Promise.all` should wait until multiple promises are fulfilled before returning.") { fulfillExpectation in
             final.then { _ in
@@ -70,7 +70,7 @@ final class PromiseAllTests: XCTestCase {
         let future1 = Future.fulfilled
         let future2 = Future<Void>.rejected(with: SimpleError()).delayed(by: 0.5)
         
-        let final = [future1, future2].all()
+        let final = [future1, future2].traverse()
         
         testExpectation(description: "`Promise.all` should wait until multiple promises are fulfilled before returning.") { fulfillExpectation in
             final.then { _ in
