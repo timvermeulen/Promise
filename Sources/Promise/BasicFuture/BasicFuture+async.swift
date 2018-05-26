@@ -7,23 +7,27 @@ public extension BasicFuture {
         }
     }
     
-    func on(_ queue: DispatchQueue) -> BasicFuture {
+    func async(_ block: @escaping (_ resolve: @escaping () -> Void) -> Void) -> BasicFuture {
         return transform { promise, value in
-            queue.async { promise.fulfill(with: value) }
+            block { promise.fulfill(with: value) }
+        }
+    }
+    
+    func on(_ queue: DispatchQueue) -> BasicFuture {
+        return async { resolve in
+            queue.async(execute: resolve)
         }
     }
     
     func asyncAfter(deadline: DispatchTime, on queue: DispatchQueue) -> BasicFuture {
-        return transform { promise, value in
-            queue.asyncAfter(deadline: deadline) { promise.fulfill(with: value) }
+        return async { resolve in
+            queue.asyncAfter(deadline: deadline, execute: resolve)
         }
     }
     
-    func delayed(by interval: TimeInterval, on queue: DispatchQueue) -> BasicFuture {
-        return transform { promise, value in
-            Timer.scheduledTimer(withTimeInterval: interval, repeats: false) { _ in
-                queue.async { promise.fulfill(with: value) }
-            }
+    func delayed(by interval: TimeInterval) -> BasicFuture {
+        return async { resolve in
+            Timer.scheduledTimer(withTimeInterval: interval, repeats: false) { _ in resolve() }
         }
     }
     

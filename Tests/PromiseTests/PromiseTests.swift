@@ -16,7 +16,7 @@ final class PromiseTests: XCTestCase {
     
     func testAsync() {
         testExpectation { fulfillExpectation in
-            let future = Future.fulfilled.delayed(by: 0.05, on: .main)
+            let future = Future.fulfilled.delayed(by: 0.05)
 
             future.then {
                 fulfillExpectation()
@@ -39,7 +39,7 @@ final class PromiseTests: XCTestCase {
     }
     
     func testAsyncRejection() {
-        let future = Future<Void>.rejected(with: SimpleError()).delayed(by: 0.05, on: .main)
+        let future = Future<Void>.rejected(with: SimpleError()).delayed(by: 0.05)
         
         testExpectation { fulfillExpectation in
             future.then {
@@ -108,10 +108,10 @@ final class PromiseTests: XCTestCase {
     }
     
     func testFlatMap() {
-        let future1 = Future.fulfilled(with: "hello").delayed(by: 0.05, on: .main)
+        let future1 = Future.fulfilled(with: "hello").delayed(by: 0.05)
 
         let future2 = future1.flatMap { value in
-            Future.fulfilled(with: value.count).delayed(by: 0.05, on: .main)
+            Future.fulfilled(with: value.count).delayed(by: 0.05)
         }
 
         testExpectation { fulfillExpectation in

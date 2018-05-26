@@ -46,19 +46,25 @@ public extension Future {
         }
     }
     
-    func recover(_ recovery: @escaping (Error) throws -> Future) -> Future {
-        return Future { promise in
+    func transformError(_ transform: @escaping (Promise<Value>, Error) throws -> Void) -> Future {
+        return .init { promise in
             then(promise.fulfill)
             
             `catch` { error in
                 do {
-                    let recovered = try recovery(error)
-                    recovered.then(promise.fulfill)
-                    recovered.catch(promise.reject)
+                    try transform(promise, error)
                 } catch {
                     promise.reject(with: error)
                 }
             }
+        }
+    }
+    
+    func recover(_ recovery: @escaping (Error) throws -> Future) -> Future {
+        return transformError { promise, error in
+            let recovered = try recovery(error)
+            recovered.then(promise.fulfill)
+            recovered.catch(promise.reject)
         }
     }
     

@@ -13,8 +13,8 @@ final class PromiseZipTests: XCTestCase {
     }
 
     func testAsyncZip() {
-        let future1 = Future.fulfilled.delayed(by: 1 / 3, on: .main)
-        let future2 = Future.fulfilled.delayed(by: 2 / 3, on: .main)
+        let future1 = Future.fulfilled.delayed(by: 1 / 3)
+        let future2 = Future.fulfilled.delayed(by: 2 / 3)
 
         let zipped = zip(future1, future2)
         

@@ -3,7 +3,7 @@ import Promise
 
 final class PromiseRecoverTests: XCTestCase {
     func testRecover() {
-        let future = Future<Void>.rejected(with: SimpleError()).delayed(by: 0.1, on: .main)
+        let future = Future<Void>.rejected(with: SimpleError()).delayed(by: 0.1)
         
         let recovered = future.recover { _ in
             return Future {}
@@ -17,7 +17,7 @@ final class PromiseRecoverTests: XCTestCase {
     }
     
     func testRecoverWithThrowingFunction() {
-        let future = Future<Void>.rejected(with: SimpleError()).delayed(by: 0.1, on: .main)
+        let future = Future<Void>.rejected(with: SimpleError()).delayed(by: 0.1)
         
         let recovered = future.recover { _ in
             _ = try JSONSerialization.data(withJSONObject: ["key": "value"])
@@ -32,7 +32,7 @@ final class PromiseRecoverTests: XCTestCase {
     }
     
     func testRecoverWithThrowingFunctionError() {
-        let future = Future<Void>.rejected(with: SimpleError()).delayed(by: 0.1, on: .main)
+        let future = Future<Void>.rejected(with: SimpleError()).delayed(by: 0.1)
         
         let recovered = future.recover { error -> Future<Void> in
             throw SimpleError()
@@ -60,7 +60,7 @@ final class PromiseRecoverTests: XCTestCase {
     }
     
     func testIgnoreRecover() {
-        let future = Future.fulfilled(with: true).delayed(by: 0.1, on: .main)
+        let future = Future.fulfilled(with: true).delayed(by: 0.1)
         
         let recovered = future.recover { _ in
             return Future.fulfilled(with: false)
