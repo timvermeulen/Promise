@@ -92,31 +92,22 @@ public extension Future where Value == Void {
     }
 }
 
-public protocol _Future {
-    associatedtype Value
-    var _future: Future<Value> { get }
-}
-
-extension Future: _Future {
-    public var _future: Future { return self }
-}
-
 private func _race<T>(_ left: Future<T>, _ right: Future<T>) -> Future<T> {
     return race(left, right)
 }
 
-public extension Sequence where Element: _Future {
+public extension Sequence {
     /// Wait for all the promises you give it to fulfill, and once they have, fulfill itself
     /// with the array of all fulfilled values. Preserves the order of the promises.
-    func all() -> Future<[Element.Value]> {
-        return lazy.map { $0._future }.reduce(.fulfilled(with: [])) {
+    func all<T>() -> Future<[T]> where Element == Future<T> {
+        return reduce(.fulfilled(with: [])) {
             zip($0, $1).map { $0 + [$1] }
         }
     }
     
     /// Fulfills or rejects with the first promise that completes
     /// (as opposed to waiting for all of them, like `.all` does).
-    func race() -> Future<Element.Value> {
-        return lazy.map { $0._future }.reduce(.pending, _race)
+    func race<T>() -> Future<T> where Element == Future<T> {
+        return reduce(.pending, _race)
     }
 }

@@ -45,23 +45,18 @@ public extension BasicFuture where Value == Void {
     }
 }
 
-public protocol _BasicFuture {
-    associatedtype Value
-    var _promise: BasicFuture<Value> { get }
-}
-
 private func _race<T>(_ left: BasicFuture<T>, _ right: BasicFuture<T>) -> BasicFuture<T> {
     return race(left, right)
 }
 
-public extension Sequence where Element: _BasicFuture {
-    func all() -> BasicFuture<[Element.Value]> {
-        return lazy.map { $0._promise }.reduce(.fulfilled(with: [])) {
+public extension Sequence {
+    func all<T>() -> BasicFuture<[T]> where Element == BasicFuture<T> {
+        return reduce(.fulfilled(with: [])) {
             zip($0, $1).map { $0 + [$1] }
         }
     }
     
-    func race() -> BasicFuture<Element.Value> {
-        return lazy.map { $0._promise }.reduce(.pending, _race)
+    func race<T>() -> BasicFuture<T> where Element == BasicFuture<T> {
+        return reduce(.pending, _race)
     }
 }
