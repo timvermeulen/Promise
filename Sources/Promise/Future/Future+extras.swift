@@ -17,38 +17,36 @@ public extension Future {
         return Future { throw error }
     }
     
-    func map<T>(_ transform: @escaping (Value) throws -> T) -> Future<T> {
+    func transform<T>(_ transform: @escaping (Promise<T>, Value) throws -> Void) -> Future<T> {
         return .init { promise in
             then { value in
                 do {
-                    promise.fulfill(with: try transform(value))
+                    try transform(promise, value)
                 } catch {
                     promise.reject(with: error)
                 }
             }
             
             `catch`(promise.reject)
+        }
+    }
+    
+    func map<T>(_ transform: @escaping (Value) throws -> T) -> Future<T> {
+        return self.transform { promise, value in
+            promise.fulfill(with: try transform(value))
         }
     }
     
     func flatMap<T>(_ transform: @escaping (Value) throws -> Future<T>) -> Future<T> {
-        return .init { promise in
-            then { value in
-                do {
-                    let future = try transform(value)
-                    
-                    future.then(promise.fulfill)
-                    future.catch(promise.reject)
-                } catch {
-                    promise.reject(with: error)
-                }
-            }
+        return self.transform { promise, value in
+            let future = try transform(value)
             
-            `catch`(promise.reject)
+            future.then(promise.fulfill)
+            future.catch(promise.reject)
         }
     }
     
-    func recover(recovery: @escaping (Error) throws -> Future) -> Future {
+    func recover(_ recovery: @escaping (Error) throws -> Future) -> Future {
         return Future { promise in
             then(promise.fulfill)
             
@@ -94,31 +92,31 @@ public extension Future where Value == Void {
     }
 }
 
-public protocol _FailablePromise {
+public protocol _Future {
     associatedtype Value
-    var _promise: Future<Value> { get }
+    var _future: Future<Value> { get }
 }
 
-extension Future: _FailablePromise {
-    public var _promise: Future { return self }
+extension Future: _Future {
+    public var _future: Future { return self }
 }
 
 private func _race<T>(_ left: Future<T>, _ right: Future<T>) -> Future<T> {
     return race(left, right)
 }
 
-public extension Collection where Element: _FailablePromise {
+public extension Sequence where Element: _Future {
     /// Wait for all the promises you give it to fulfill, and once they have, fulfill itself
     /// with the array of all fulfilled values. Preserves the order of the promises.
     func all() -> Future<[Element.Value]> {
-        return reduce(.fulfilled(with: [])) {
-            return zip($0, $1._promise).map { return $0 + [$1] }
+        return lazy.map { $0._future }.reduce(.fulfilled(with: [])) {
+            zip($0, $1).map { $0 + [$1] }
         }
     }
     
     /// Fulfills or rejects with the first promise that completes
     /// (as opposed to waiting for all of them, like `.all` does).
     func race() -> Future<Element.Value> {
-        return reduce(.pending, { _race($0, $1._promise) })
+        return lazy.map { $0._future }.reduce(.pending, _race)
     }
 }

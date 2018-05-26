@@ -52,6 +52,10 @@ public extension Future {
         return Future()
     }
     
+    convenience init(_ promise: BasicPromise<Value>) {
+        self.init(value: promise, error: BasicPromise())
+    }
+    
     convenience init(_ block: (Promise<Value>) throws -> Void) {
         self.init()
         let promise = Promise(future: self)

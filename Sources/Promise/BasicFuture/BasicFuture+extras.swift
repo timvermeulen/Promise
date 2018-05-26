@@ -45,8 +45,7 @@ public extension BasicFuture where Value == Void {
     }
 }
 
-// TODO: remove this protocol once we have parameterized extensions
-public protocol _Promise {
+public protocol _BasicFuture {
     associatedtype Value
     var _promise: BasicFuture<Value> { get }
 }
@@ -55,14 +54,14 @@ private func _race<T>(_ left: BasicFuture<T>, _ right: BasicFuture<T>) -> BasicF
     return race(left, right)
 }
 
-public extension Collection where Element: _Promise {
+public extension Sequence where Element: _BasicFuture {
     func all() -> BasicFuture<[Element.Value]> {
-        return reduce(.fulfilled(with: [])) {
-            zip($0, $1._promise).map { $0 + [$1] }
+        return lazy.map { $0._promise }.reduce(.fulfilled(with: [])) {
+            zip($0, $1).map { $0 + [$1] }
         }
     }
     
     func race() -> BasicFuture<Element.Value> {
-        return reduce(.pending, { _race($0, $1._promise) })
+        return lazy.map { $0._promise }.reduce(.pending, _race)
     }
 }
