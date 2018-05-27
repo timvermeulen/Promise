@@ -67,12 +67,6 @@ public extension Future {
             return value
         }
     }
-    
-    @discardableResult
-    func with(_ block: @escaping (Future) -> Void) -> Future {
-        block(self)
-        return self
-    }
 }
 
 public func race<T>(_ left: Future<T>, _ right: Future<T>) -> Future<T> {

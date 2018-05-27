@@ -73,25 +73,34 @@ public extension Future {
         promise.do { try block(promise) }
     }
     
-    func then(_ handler: @escaping (Value) -> Void) {
+    @discardableResult
+    func then(_ handler: @escaping (Value) -> Void) -> Future {
         result.then { result in
             if case .success(let value) = result {
                 handler(value)
             }
         }
+        
+        return self
     }
     
-    func `catch`(_ handler: @escaping (Error) -> Void) {
+    @discardableResult
+    func `catch`(_ handler: @escaping (Error) -> Void) -> Future {
         result.then { result in
             if case .failure(let error) = result {
                 handler(error)
             }
         }
+        
+        return self
     }
     
-    func always(_ handler: @escaping () -> Void) {
+    @discardableResult
+    func always(_ handler: @escaping () -> Void) -> Future {
         result.then { _ in
             handler()
         }
+        
+        return self
     }
 }

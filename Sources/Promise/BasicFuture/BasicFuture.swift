@@ -58,7 +58,8 @@ public extension BasicFuture {
         block(BasicPromise(future: self))
     }
     
-    func then(_ callback: @escaping (Value) -> Void) {
+    @discardableResult
+    func then(_ callback: @escaping (Value) -> Void) -> BasicFuture {
         let value = state.access { state -> Value? in
             switch state {
             case .pending(var callbacks):
@@ -75,5 +76,7 @@ public extension BasicFuture {
         if let value = value {
             callback(value)
         }
+        
+        return self
     }
 }
