@@ -35,10 +35,7 @@ public extension Future {
     
     func flatMap<T>(_ transform: @escaping (Value) throws -> Future<T>) -> Future<T> {
         return self.transform { promise, value in
-            let future = try transform(value)
-            
-            future.then(promise.fulfill)
-            future.catch(promise.reject)
+            promise.observe(try transform(value))
         }
     }
     
@@ -54,9 +51,7 @@ public extension Future {
     
     func recover(_ recovery: @escaping (Error) throws -> Future) -> Future {
         return transformError { promise, error in
-            let recovered = try recovery(error)
-            recovered.then(promise.fulfill)
-            recovered.catch(promise.reject)
+            promise.observe(try recovery(error))
         }
     }
     
@@ -70,11 +65,8 @@ public extension Future {
 
 public func race<T>(_ left: Future<T>, _ right: Future<T>) -> Future<T> {
     return Future { promise in
-        left.then(promise.fulfill)
-        left.catch(promise.reject)
-        
-        right.then(promise.fulfill)
-        right.catch(promise.reject)
+        promise.observe(left)
+        promise.observe(right)
     }
 }
 

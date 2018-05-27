@@ -35,6 +35,11 @@ public extension Promise {
     func resolve(_ block: () throws -> Value) {
         `do` { fulfill(with: try block()) }
     }
+    
+    func observe(_ future: Future<Value>) {
+        future.then(fulfill)
+        future.catch(reject)
+    }
 }
 
 extension Promise where Value == Void {
