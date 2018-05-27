@@ -25,14 +25,15 @@ public extension BasicFuture {
         }
     }
     
+    func timed() -> BasicFuture<(value: Value, elapsedTime: TimeInterval)> {
+        let start = Date()
+        return map { ($0, Date().timeIntervalSince(start)) }
+    }
+    
+    @available(OSX 10.12, *)
     func delayed(by interval: TimeInterval) -> BasicFuture {
         return async { resolve in
             Timer.scheduledTimer(withTimeInterval: interval, repeats: false) { _ in resolve() }
         }
-    }
-    
-    func timed() -> BasicFuture<(value: Value, elapsedTime: TimeInterval)> {
-        let start = Date()
-        return map { ($0, Date().timeIntervalSince(start)) }
     }
 }

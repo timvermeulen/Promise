@@ -11,10 +11,6 @@ public extension Future {
         }
     }
     
-    func timedOut(after delay: TimeInterval, withError error: Error) -> Future {
-        return race(self, Future.rejected(with: error).delayed(by: delay))
-    }
-    
     func async(_ block: @escaping (_ resolve: @escaping () -> Void) -> Void) -> Future {
         return .init { promise in
             then { value in
@@ -39,14 +35,21 @@ public extension Future {
         }
     }
     
+    func timed() -> Future<(value: Value, elapsedTime: TimeInterval)> {
+        let start = Date()
+        return map { ($0, Date().timeIntervalSince(start)) }
+    }
+}
+
+@available(OSX 10.12, *)
+public extension Future {
     func delayed(by interval: TimeInterval) -> Future {
         return async { resolve in
             Timer.scheduledTimer(withTimeInterval: interval, repeats: false) { _ in resolve() }
         }
     }
     
-    func timed() -> Future<(value: Value, elapsedTime: TimeInterval)> {
-        let start = Date()
-        return map { ($0, Date().timeIntervalSince(start)) }
+    func timedOut(after delay: TimeInterval, withError error: Error) -> Future {
+        return race(self, Future.rejected(with: error).delayed(by: delay))
     }
 }
