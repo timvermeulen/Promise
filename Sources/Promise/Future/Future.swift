@@ -1,22 +1,27 @@
 public final class Promise<Value> {
     public let future: Future<Value>
+    private let result: BasicPromise<Result<Value>>
     
-    fileprivate init(future: Future<Value>) {
+    fileprivate init(future: Future<Value>, result: BasicPromise<Result<Value>>) {
         self.future = future
+        self.result = result
     }
 }
 
 public extension Promise {
     convenience init() {
-        self.init(future: .pending)
+        let result = BasicPromise<Result<Value>>()
+        let future = Future<Value>(result: result.future)
+        
+        self.init(future: future, result: result)
     }
     
     func fulfill(with value: Value) {
-        future.value.fulfill(with: value)
+        result.fulfill(with: .success(value))
     }
     
     func reject(with error: Error) {
-        future.error.fulfill(with: error)
+        result.fulfill(with: .failure(error))
     }
     
     func `do`(_ block: () throws -> Void) {
@@ -35,38 +40,26 @@ extension Promise where Value == Void {
 }
 
 public final class Future<Value> {
-    fileprivate let value: BasicPromise<Value>
-    fileprivate let error: BasicPromise<Error>
-    
     private let result: BasicFuture<Result<Value>>
     
-    private init(value: BasicPromise<Value>, error: BasicPromise<Error>) {
-        self.value = value
-        self.error = error
-        
-        result = race(
-            value.future.map(Result.success),
-            error.future.map(Result.failure)
-        )
-    }
-    
-    private convenience init() {
-        self.init(value: BasicPromise(), error: BasicPromise())
+    fileprivate init(result: BasicFuture<Result<Value>>) {
+        self.result = result
     }
 }
 
 public extension Future {
     static var pending: Future {
-        return Future()
+        return Future(result: .pending)
     }
     
-    convenience init(_ promise: BasicPromise<Value>) {
-        self.init(value: promise, error: BasicPromise())
+    convenience init(_ future: BasicFuture<Value>) {
+        self.init(result: future.map(Result.success))
     }
     
     convenience init(_ block: (Promise<Value>) throws -> Void) {
-        self.init()
-        let promise = Promise(future: self)
+        let result = BasicPromise<Result<Value>>()
+        self.init(result: result.future)
+        let promise = Promise(future: self, result: result)
         
         promise.do {
             try block(promise)
