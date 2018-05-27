@@ -24,6 +24,12 @@ public extension BasicFuture {
             transform(value).then(promise.fulfill)
         }
     }
+    
+    @discardableResult
+    func with(_ block: @escaping (BasicFuture) -> Void) -> BasicFuture {
+        block(self)
+        return self
+    }
 }
 
 func race<T>(_ left: BasicFuture<T>, _ right: BasicFuture<T>) -> BasicFuture<T> {
