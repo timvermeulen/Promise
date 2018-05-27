@@ -49,6 +49,12 @@ public extension Future {
         }
     }
     
+    func mapError(_ transform: @escaping (Error) throws -> Error) -> Future {
+        return self.transformError { _, error in
+            throw try transform(error)
+        }
+    }
+    
     func recover(_ recovery: @escaping (Error) throws -> Future) -> Future {
         return transformError { promise, error in
             promise.observe(try recovery(error))
