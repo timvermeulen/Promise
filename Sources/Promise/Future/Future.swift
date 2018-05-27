@@ -31,6 +31,10 @@ public extension Promise {
             reject(with: error)
         }
     }
+    
+    func resolve(_ block: () throws -> Value) {
+        `do` { fulfill(with: try block()) }
+    }
 }
 
 extension Promise where Value == Void {
@@ -61,9 +65,7 @@ public extension Future {
         self.init(result: result.future)
         let promise = Promise(future: self, result: result)
         
-        promise.do {
-            try block(promise)
-        }
+        promise.do { try block(promise) }
     }
     
     func then(_ handler: @escaping (Value) -> Void) {

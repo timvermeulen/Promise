@@ -30,7 +30,7 @@ public extension BasicFuture {
         return map { ($0, Date().timeIntervalSince(start)) }
     }
     
-    @available(OSX 10.12, *)
+    @available(macOS 10.12, iOS 10.0, *)
     func delayed(by interval: TimeInterval) -> BasicFuture {
         return async { resolve in
             Timer.scheduledTimer(withTimeInterval: interval, repeats: false) { _ in resolve() }

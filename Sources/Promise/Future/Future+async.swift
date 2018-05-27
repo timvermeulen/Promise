@@ -3,11 +3,7 @@ import Foundation
 public extension Future {
     convenience init(asyncOn queue: DispatchQueue, _ block: @escaping () throws -> Value) {
         self.init { promise in
-            queue.async {
-                promise.do {
-                    promise.fulfill(with: try block())
-                }
-            }
+            queue.async { promise.resolve(block) }
         }
     }
     
@@ -41,7 +37,7 @@ public extension Future {
     }
 }
 
-@available(OSX 10.12, *)
+@available(OSX 10.12, iOS 10.0, *)
 public extension Future {
     func delayed(by interval: TimeInterval) -> Future {
         return async { resolve in

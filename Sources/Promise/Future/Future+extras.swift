@@ -1,26 +1,26 @@
 public extension Future {
     convenience init(_ block: () throws -> Value) {
         self.init { promise in
-            promise.do {
-                promise.fulfill(with: try block())
-            }
+            promise.resolve(block)
         }
     }
     
     static func fulfilled(with value: Value) -> Future {
-        return Future { value }
+        return Future { promise in
+            promise.fulfill(with: value)
+        }
     }
     
     static func rejected(with error: Error) -> Future {
-        return Future { throw error }
+        return Future { promise in
+            promise.reject(with: error)
+        }
     }
     
     func transform<T>(_ transform: @escaping (Promise<T>, Value) throws -> Void) -> Future<T> {
         return .init { promise in
             then { value in
-                promise.do {
-                    try transform(promise, value)
-                }
+                promise.do { try transform(promise, value) }
             }
             
             `catch`(promise.reject)
@@ -47,9 +47,7 @@ public extension Future {
             then(promise.fulfill)
             
             `catch` { error in
-                promise.do {
-                    try transform(promise, error)
-                }
+                promise.do { try transform(promise, error) }
             }
         }
     }
