@@ -37,3 +37,27 @@ public extension Future {
         return race(self, Future.rejected(with: error).delayed(by: delay))
     }
 }
+
+public extension URLSession {
+    func dataTask(with request: URLRequest) -> Future<(data: Data, response: URLResponse)> {
+        return Future { promise in
+            let task = dataTask(with: request) { data, response, error in
+                promise.resolve {
+                    if let data = data, let response = response {
+                        return (data, response)
+                    } else if let error = error {
+                        throw error
+                    } else {
+                        fatalError()
+                    }
+                }
+            }
+            
+            task.resume()
+        }
+    }
+    
+    func dataTask(with url: URL) -> Future<(data: Data, response: URLResponse)> {
+        return dataTask(with: URLRequest(url: url))
+    }
+}

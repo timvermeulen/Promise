@@ -28,8 +28,8 @@ public extension Future {
     convenience init(_ block: (Promise<Value>) throws -> Void) {
         let result = BasicPromise<Result<Value>>()
         self.init(result: result.future)
-        let promise = Promise(future: self, result: result)
         
+        let promise = Promise(future: self, result: result)
         promise.do { try block(promise) }
     }
     
