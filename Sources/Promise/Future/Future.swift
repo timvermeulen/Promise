@@ -1,63 +1,13 @@
-public final class Promise<Value> {
-    public let future: Future<Value>
-    private let result: BasicPromise<Result<Value>>
-    
-    fileprivate init(future: Future<Value>, result: BasicPromise<Result<Value>>) {
-        self.future = future
-        self.result = result
-    }
-}
-
-public extension Promise {
-    convenience init() {
-        let result = BasicPromise<Result<Value>>()
-        let future = Future<Value>(result: result.future)
-        
-        self.init(future: future, result: result)
-    }
-    
-    func fulfill(with value: Value) {
-        result.fulfill(with: .success(value))
-    }
-    
-    func reject(with error: Error) {
-        result.fulfill(with: .failure(error))
-    }
-    
-    func `do`(_ block: () throws -> Void) {
-        do {
-            try block()
-        } catch {
-            reject(with: error)
-        }
-    }
-    
-    func resolve(_ block: () throws -> Value) {
-        `do` { fulfill(with: try block()) }
-    }
-    
-    func observe(_ future: Future<Value>) {
-        future.then(fulfill)
-        future.catch(reject)
-    }
-}
-
-extension Promise where Value == Void {
-    public func fulfill() {
-        fulfill(with: ())
-    }
-}
-
 public final class Future<Value> {
     private let result: BasicFuture<Result<Value>>
     
-    fileprivate init(result: BasicFuture<Result<Value>>) {
+    init(result: BasicFuture<Result<Value>>) {
         self.result = result
     }
 }
 
 private extension Future {
-    convenience init(context: @escaping (@escaping () -> Void) -> Void, _ block: (Promise<Value>) throws -> Void) {
+    convenience init(context: @escaping ExecutionContext, _ block: (Promise<Value>) throws -> Void) {
         let result = BasicPromise<Result<Value>>()
         self.init(result: result.future.async(context))
         
@@ -114,7 +64,7 @@ public extension Future {
         return self
     }
     
-    func async(_ context: @escaping (@escaping () -> Void) -> Void) -> Future {
+    func async(_ context: @escaping ExecutionContext) -> Future {
         return .init(context: context) { promise in
             promise.observe(self)
         }

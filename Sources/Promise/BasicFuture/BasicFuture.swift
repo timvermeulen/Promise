@@ -1,32 +1,8 @@
-public final class BasicPromise<Value> {
-    public let future: BasicFuture<Value>
-    
-    fileprivate init(future: BasicFuture<Value>) {
-        self.future = future
-    }
-}
-
-public extension BasicPromise {
-    convenience init() {
-        self.init(future: .pending)
-    }
-    
-    func fulfill(with value: Value) {
-        future.fulfill(with: value)
-    }
-}
-
-extension BasicPromise where Value == Void {
-    public func fulfill() {
-        fulfill(with: ())
-    }
-}
-
 public final class BasicFuture<Value> {
     private let state: Atomic<State>
-    private let context: ((@escaping () -> Void) -> Void)?
+    private let context: ExecutionContext?
     
-    private init(context: ((@escaping () -> Void) -> Void)?) {
+    private init(context: ExecutionContext?) {
         self.state = Atomic(.pending(callbacks: []))
         self.context = context
     }
@@ -38,7 +14,7 @@ private extension BasicFuture {
         case fulfilled(with: Value)
     }
     
-    convenience init(context: ((@escaping () -> Void) -> Void)?, _ block: (BasicPromise<Value>) -> Void) {
+    convenience init(context: ExecutionContext?, _ block: (BasicPromise<Value>) -> Void) {
         self.init(context: context)
         block(BasicPromise(future: self))
     }
@@ -50,7 +26,9 @@ private extension BasicFuture {
             block()
         }
     }
-    
+}
+
+internal extension BasicFuture {
     func fulfill(with value: Value) {
         let callbacks: [(Value) -> Void]? = state.access { state in
             guard case .pending(let callbacks) = state else { return nil }
@@ -96,7 +74,7 @@ public extension BasicFuture {
         return self
     }
     
-    func async(_ context: @escaping (@escaping () -> Void) -> Void) -> BasicFuture {
+    func async(_ context: @escaping ExecutionContext) -> BasicFuture {
         return .init(context: context) { promise in
             then(promise.fulfill)
         }
