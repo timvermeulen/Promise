@@ -9,9 +9,9 @@ final class PromiseRecoverTests: XCTestCase {
             return Future {}
         }
         
-        testExpectation { fulfillExpectation in
+        testExpectation { fulfill in
             recovered.then {
-                fulfillExpectation()
+                fulfill()
             }
         }
     }
@@ -24,9 +24,9 @@ final class PromiseRecoverTests: XCTestCase {
             return .fulfilled
         }
         
-        testExpectation { fulfillExpectation in
+        testExpectation { fulfill in
             recovered.then {
-                fulfillExpectation()
+                fulfill()
             }
         }
     }
@@ -38,9 +38,9 @@ final class PromiseRecoverTests: XCTestCase {
             throw SimpleError()
         }
         
-        testExpectation { fulfillExpectation in
+        testExpectation { fulfill in
             recovered.catch { _ in
-                fulfillExpectation()
+                fulfill()
             }
         }
     }
@@ -52,9 +52,9 @@ final class PromiseRecoverTests: XCTestCase {
             return .fulfilled
         }
         
-        testExpectation { fulfillExpectation in
+        testExpectation { fulfill in
             recovered.then {
-                fulfillExpectation()
+                fulfill()
             }
         }
     }
@@ -66,10 +66,10 @@ final class PromiseRecoverTests: XCTestCase {
             return Future.fulfilled(with: false)
         }
         
-        testExpectation { fulfillExpectation in
+        testExpectation { fulfill in
             recovered.then { value in
                 XCTAssert(value)
-                fulfillExpectation()
+                fulfill()
             }
         }
     }
@@ -81,10 +81,10 @@ final class PromiseRecoverTests: XCTestCase {
             return Future.fulfilled(with: false)
         }
         
-        testExpectation { fulfillExpectation in
+        testExpectation { fulfill in
             recovered.then { value in
                 XCTAssert(value)
-                fulfillExpectation()
+                fulfill()
             }
         }
     }

@@ -24,9 +24,11 @@ extension BasicPromise where Value == Void {
 
 public final class BasicFuture<Value> {
     private let state: Atomic<State>
+    private let context: ((@escaping () -> Void) -> Void)?
     
-    private init() {
-        state = Atomic(.pending(callbacks: []))
+    private init(context: ((@escaping () -> Void) -> Void)?) {
+        self.state = Atomic(.pending(callbacks: []))
+        self.context = context
     }
 }
 
@@ -34,6 +36,19 @@ private extension BasicFuture {
     enum State {
         case pending(callbacks: [(Value) -> Void])
         case fulfilled(with: Value)
+    }
+    
+    convenience init(context: ((@escaping () -> Void) -> Void)?, _ block: (BasicPromise<Value>) -> Void) {
+        self.init(context: context)
+        block(BasicPromise(future: self))
+    }
+    
+    func perform(_ block: @escaping () -> Void) {
+        if let context = context {
+            context { block() }
+        } else {
+            block()
+        }
     }
     
     func fulfill(with value: Value) {
@@ -44,18 +59,19 @@ private extension BasicFuture {
             return callbacks
         }
         
-        callbacks?.forEach { $0(value) }
+        callbacks?.forEach { callback in
+            perform { callback(value) }
+        }
     }
 }
 
 public extension BasicFuture {
     static var pending: BasicFuture {
-        return BasicFuture()
+        return BasicFuture(context: nil)
     }
     
     convenience init(_ block: (BasicPromise<Value>) -> Void) {
-        self.init()
-        block(BasicPromise(future: self))
+        self.init(context: nil, block)
     }
     
     @discardableResult
@@ -74,9 +90,15 @@ public extension BasicFuture {
         }
         
         if let value = value {
-            callback(value)
+            perform { callback(value) }
         }
         
         return self
+    }
+    
+    func async(_ context: @escaping (@escaping () -> Void) -> Void) -> BasicFuture {
+        return .init(context: context) { promise in
+            then(promise.fulfill)
+        }
     }
 }

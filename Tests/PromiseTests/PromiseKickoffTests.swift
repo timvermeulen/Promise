@@ -5,9 +5,9 @@ final class PromiseKickoffTests: XCTestCase {
     func testKickoff() {
         let future = Future {}
         
-        testExpectation { fulfillExpectation in
+        testExpectation { fulfill in
             future.then {
-                fulfillExpectation()
+                fulfill()
             }
         }
     }
@@ -17,9 +17,9 @@ final class PromiseKickoffTests: XCTestCase {
             throw SimpleError()
         }
         
-        testExpectation { fulfillExpectation in
+        testExpectation { fulfill in
             future.catch { _ in
-                fulfillExpectation()
+                fulfill()
             }
         }
     }

@@ -56,6 +56,16 @@ public final class Future<Value> {
     }
 }
 
+private extension Future {
+    convenience init(context: @escaping (@escaping () -> Void) -> Void, _ block: (Promise<Value>) throws -> Void) {
+        let result = BasicPromise<Result<Value>>()
+        self.init(result: result.future.async(context))
+        
+        let promise = Promise(future: self, result: result)
+        promise.do { try block(promise) }
+    }
+}
+
 public extension Future {
     static var pending: Future {
         return Future(result: .pending)
@@ -102,5 +112,11 @@ public extension Future {
         }
         
         return self
+    }
+    
+    func async(_ context: @escaping (@escaping () -> Void) -> Void) -> Future {
+        return .init(context: context) { promise in
+            promise.observe(self)
+        }
     }
 }

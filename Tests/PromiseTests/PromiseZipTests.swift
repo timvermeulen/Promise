@@ -5,9 +5,9 @@ final class PromiseZipTests: XCTestCase {
     func testZip() {
         let future = zip(Future.fulfilled, .fulfilled)
 
-        testExpectation() { fulfillExpectation in
+        testExpectation() { fulfill in
             future.then { _ in
-                fulfillExpectation()
+                fulfill()
             }
         }
     }
@@ -18,9 +18,9 @@ final class PromiseZipTests: XCTestCase {
 
         let zipped = zip(future1, future2)
         
-        testExpectation() { fulfillExpectation in
+        testExpectation() { fulfill in
             zipped.then { _ in
-                fulfillExpectation()
+                fulfill()
             }
         }
     }

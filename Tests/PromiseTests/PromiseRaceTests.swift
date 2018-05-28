@@ -9,10 +9,10 @@ final class PromiseRaceTests: XCTestCase {
         
         let final = [future1, future2, future3].race()
         
-        testExpectation { fulfillExpectation in
+        testExpectation { fulfill in
             final.then { value in
                 XCTAssertEqual(value, 2)
-                fulfillExpectation()
+                fulfill()
             }
         }
     }
@@ -23,9 +23,9 @@ final class PromiseRaceTests: XCTestCase {
         
         let final = race(future1, future2)
         
-        testExpectation { fulfillExpectation in
+        testExpectation { fulfill in
             final.catch { _ in
-                fulfillExpectation()
+                fulfill()
             }
         }
     }
@@ -36,10 +36,10 @@ final class PromiseRaceTests: XCTestCase {
         
         let final = race(future1, future2)
         
-        testExpectation { fulfillExpectation in
+        testExpectation { fulfill in
             final.then { value in
                 XCTAssert(value)
-                fulfillExpectation()
+                fulfill()
             }
         }
     }
@@ -50,9 +50,9 @@ final class PromiseRaceTests: XCTestCase {
         
         let final = race(future1, future2)
         
-        testExpectation { fulfillExpectation in
+        testExpectation { fulfill in
             final.catch { _ in
-                fulfillExpectation()
+                fulfill()
             }
         }
     }

@@ -6,9 +6,9 @@ final class PromiseDelayTests: XCTestCase {
         let future = Future.fulfilled.delayed(by: 0.5)
         future.assertIsPending()
         
-        testExpectation { fulfillExpectation in
+        testExpectation { fulfill in
             future.then {
-                fulfillExpectation()
+                fulfill()
             }
         }
     }
@@ -17,9 +17,9 @@ final class PromiseDelayTests: XCTestCase {
         let future = Future<Void>.pending.timedOut(after: 0.5, withError: SimpleError())
         future.assertIsPending()
         
-        testExpectation { fulfillExpectation in
+        testExpectation { fulfill in
             future.catch { _ in
-                fulfillExpectation()
+                fulfill()
             }
         }
     }
@@ -30,9 +30,9 @@ final class PromiseDelayTests: XCTestCase {
         
         future.assertIsPending()
         
-        testExpectation { fulfillExpectation in
+        testExpectation { fulfill in
             withTimeout.then {
-                fulfillExpectation()
+                fulfill()
             }
         }
     }
@@ -44,9 +44,9 @@ final class PromiseDelayTests: XCTestCase {
         
         withTimeout.assertIsPending()
         
-        testExpectation { fulfillExpectation in
+        testExpectation { fulfill in
             withTimeout.catch { _ in
-                fulfillExpectation()
+                fulfill()
             }
         }
     }

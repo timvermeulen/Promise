@@ -7,18 +7,6 @@ public extension Future {
         }
     }
     
-    func async(_ block: @escaping (_ resolve: @escaping () -> Void) -> Void) -> Future {
-        return .init { promise in
-            then { value in
-                block { promise.fulfill(with: value) }
-            }
-            
-            `catch` { error in
-                block { promise.reject(with: error) }
-            }
-        }
-    }
-    
     func on(_ queue: DispatchQueue) -> Future {
         return async { resolve in
             queue.async(execute: resolve)

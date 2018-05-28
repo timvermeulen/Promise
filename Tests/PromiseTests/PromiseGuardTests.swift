@@ -13,9 +13,9 @@ final class PromiseGuardTests: XCTestCase {
     func testGuardSucceeds() {
         let future = Future.fulfilled.guard {}
         
-        testExpectation { fulfillExpectation in
+        testExpectation { fulfill in
             future.then {
-                fulfillExpectation()
+                fulfill()
             }
         }
     }
@@ -23,9 +23,9 @@ final class PromiseGuardTests: XCTestCase {
     func testGuardOnlyCalledOnSucceess() {
         let future = Future.rejected(with: SimpleError()).guard { XCTFail() }
         
-        testExpectation { fulfillExpectation in
+        testExpectation { fulfill in
             future.catch { _ in
-                fulfillExpectation()
+                fulfill()
             }
         }
     }

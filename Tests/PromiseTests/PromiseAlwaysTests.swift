@@ -5,9 +5,9 @@ final class PromiseAlwaysTests: XCTestCase {
     func testAlways() {
         let future = Future.fulfilled.delayed(by: 0.5)
         
-        testExpectation { fulfillExpectation in
+        testExpectation { fulfill in
             future.always {
-                fulfillExpectation()
+                fulfill()
             }
         }
     }
@@ -15,9 +15,9 @@ final class PromiseAlwaysTests: XCTestCase {
     func testAlwaysRejects() {
         let future = Future<Void>.rejected(with: SimpleError()).delayed(by: 0.5)
         
-        testExpectation { fulfillExpectation in
+        testExpectation { fulfill in
             future.always {
-                fulfillExpectation()
+                fulfill()
             }
         }
     }
@@ -25,9 +25,9 @@ final class PromiseAlwaysTests: XCTestCase {
     func testAlwaysInstantFulfill() {
         let future = Future.fulfilled
         
-        testExpectation { fulfillExpectation in
+        testExpectation { fulfill in
             future.always {
-                fulfillExpectation()
+                fulfill()
             }
         }
     }
@@ -35,9 +35,9 @@ final class PromiseAlwaysTests: XCTestCase {
     func testAlwaysInstantReject() {
         let future = Future<Void>.rejected(with: SimpleError())
         
-        testExpectation { fulfillExpectation in
+        testExpectation { fulfill in
             future.always {
-                fulfillExpectation()
+                fulfill()
             }
         }
     }

@@ -15,11 +15,11 @@ final class PromiseTests: XCTestCase {
     }
     
     func testAsync() {
-        testExpectation { fulfillExpectation in
+        testExpectation { fulfill in
             let future = Future.fulfilled.delayed(by: 0.05)
 
             future.then {
-                fulfillExpectation()
+                fulfill()
             }
         }
     }
@@ -27,13 +27,13 @@ final class PromiseTests: XCTestCase {
     func testThrowing() {
         let future = Future<Void> { throw SimpleError() }
         
-        testExpectation { fulfillExpectation in
+        testExpectation { fulfill in
             future.then {
                 XCTFail()
             }
             
             future.catch { error in
-                fulfillExpectation()
+                fulfill()
             }
         }
     }
@@ -41,13 +41,13 @@ final class PromiseTests: XCTestCase {
     func testAsyncRejection() {
         let future = Future<Void>.rejected(with: SimpleError()).delayed(by: 0.05)
         
-        testExpectation { fulfillExpectation in
+        testExpectation { fulfill in
             future.then {
                 XCTFail()
             }
 
             future.catch { error in
-                fulfillExpectation()
+                fulfill()
             }
         }
     }
@@ -73,11 +73,11 @@ final class PromiseTests: XCTestCase {
     func testFulfilled() {
         let promise = Promise<Void>()
         
-        testExpectation() { fulfillExpectation in
+        testExpectation() { fulfill in
             promise.fulfill()
 
             promise.future.then {
-                fulfillExpectation()
+                fulfill()
             }
         }
     }
@@ -85,9 +85,9 @@ final class PromiseTests: XCTestCase {
     func testRejected() {
         let promise = Promise<Void>()
 
-        testExpectation { fulfillExpectation in
+        testExpectation { fulfill in
             promise.future.catch { _ in
-                fulfillExpectation()
+                fulfill()
             }
 
             promise.reject(with: SimpleError())
@@ -99,10 +99,10 @@ final class PromiseTests: XCTestCase {
             .map { $0.count }
             .map { $0 * 2 }
         
-        testExpectation() { fulfillExpectation in
+        testExpectation() { fulfill in
             future.then { value in
                 XCTAssertEqual(value, 20)
-                fulfillExpectation()
+                fulfill()
             }
         }
     }
@@ -114,10 +114,10 @@ final class PromiseTests: XCTestCase {
             Future.fulfilled(with: value.count).delayed(by: 0.05)
         }
 
-        testExpectation { fulfillExpectation in
+        testExpectation { fulfill in
             future2.then { value in
                 XCTAssertEqual(value, 5)
-                fulfillExpectation()
+                fulfill()
             }
         }
     }

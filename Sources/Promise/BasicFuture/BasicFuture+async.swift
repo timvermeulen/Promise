@@ -7,12 +7,6 @@ public extension BasicFuture {
         }
     }
     
-    func async(_ block: @escaping (_ resolve: @escaping () -> Void) -> Void) -> BasicFuture {
-        return transform { promise, value in
-            block { promise.fulfill(with: value) }
-        }
-    }
-    
     func on(_ queue: DispatchQueue) -> BasicFuture {
         return async { resolve in
             queue.async(execute: resolve)

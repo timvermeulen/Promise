@@ -10,10 +10,10 @@ final class PromiseAllTests: XCTestCase {
         
         let final = [future1, future2, future3, future4].traverse()
         
-        testExpectation { fulfillExpectation in
+        testExpectation { fulfill in
             final.then { value in
                 XCTAssertEqual(value, [1, 2, 3, 4])
-                fulfillExpectation()
+                fulfill()
             }
         }
     }
@@ -25,10 +25,10 @@ final class PromiseAllTests: XCTestCase {
         
         let final = [future1, future2, future3].traverse()
         
-        testExpectation { fulfillExpectation in
+        testExpectation { fulfill in
             final.then { value in
                 XCTAssertEqual(value, [1, 2, 3])
-                fulfillExpectation()
+                fulfill()
             }
         }
     }
@@ -37,10 +37,10 @@ final class PromiseAllTests: XCTestCase {
         let promises: [Future<Void>] = []
         let final = promises.traverse()
         
-        testExpectation { fulfillExpectation in
+        testExpectation { fulfill in
             final.then { value in
                 XCTAssert(value.isEmpty)
-                fulfillExpectation()
+                fulfill()
             }
         }
     }
@@ -51,13 +51,13 @@ final class PromiseAllTests: XCTestCase {
         
         let final = [future1, future2].traverse()
         
-        testExpectation(description: "`Promise.all` should wait until multiple promises are fulfilled before returning.") { fulfillExpectation in
+        testExpectation(description: "`Promise.all` should wait until multiple promises are fulfilled before returning.") { fulfill in
             final.then { _ in
                 XCTFail()
             }
             
             final.catch { _ in
-                fulfillExpectation()
+                fulfill()
             }
             
             final.then { _ in
@@ -72,13 +72,13 @@ final class PromiseAllTests: XCTestCase {
         
         let final = [future1, future2].traverse()
         
-        testExpectation(description: "`Promise.all` should wait until multiple promises are fulfilled before returning.") { fulfillExpectation in
+        testExpectation(description: "`Promise.all` should wait until multiple promises are fulfilled before returning.") { fulfill in
             final.then { _ in
                 XCTFail()
             }
             
             final.catch { _ in
-                fulfillExpectation()
+                fulfill()
             }
             
             final.then { _ in
