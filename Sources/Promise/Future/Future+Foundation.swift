@@ -39,11 +39,11 @@ public extension Future {
 }
 
 public extension URLSession {
-    func dataTask(with request: URLRequest) -> Future<(data: Data, response: URLResponse)> {
+    func dataTask(with request: URLRequest) -> Future<(data: Data, response: HTTPURLResponse)> {
         return Future { promise in
             let task = dataTask(with: request) { data, response, error in
                 promise.resolve {
-                    if let data = data, let response = response {
+                    if let data = data, let response = response as? HTTPURLResponse {
                         return (data, response)
                     } else if let error = error {
                         throw error
@@ -57,7 +57,7 @@ public extension URLSession {
         }
     }
     
-    func dataTask(with url: URL) -> Future<(data: Data, response: URLResponse)> {
+    func dataTask(with url: URL) -> Future<(data: Data, response: HTTPURLResponse)> {
         return dataTask(with: URLRequest(url: url))
     }
 }
