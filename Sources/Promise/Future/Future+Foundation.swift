@@ -8,7 +8,7 @@ public extension Future {
     }
     
     func on(_ queue: DispatchQueue) -> Future {
-        return async { resolve in
+        return changeContext { resolve in
             queue.async(execute: resolve)
         }
     }

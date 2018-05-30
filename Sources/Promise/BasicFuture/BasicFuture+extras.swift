@@ -24,6 +24,12 @@ public extension BasicFuture {
             transform(value).then(promise.fulfill)
         }
     }
+    
+    func async(_ context: @escaping ExecutionContext) -> BasicFuture {
+        return transform { promise, value in
+            context { promise.fulfill(with: value) }
+        }
+    }
 }
 
 func race<T>(_ left: BasicFuture<T>, _ right: BasicFuture<T>) -> BasicFuture<T> {

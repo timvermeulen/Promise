@@ -7,9 +7,9 @@ public final class Future<Value> {
 }
 
 private extension Future {
-    convenience init(context: @escaping ExecutionContext, _ block: (Promise<Value>) throws -> Void) {
+    convenience init(context: ExecutionContext?, _ block: (Promise<Value>) throws -> Void) {
         let result = BasicPromise<Result<Value>>()
-        self.init(result: result.future.async(context))
+        self.init(result: context.map(result.future.changeContext) ?? result.future)
         
         let promise = Promise(future: self, result: result)
         promise.do { try block(promise) }
@@ -26,11 +26,7 @@ public extension Future {
     }
     
     convenience init(_ block: (Promise<Value>) throws -> Void) {
-        let result = BasicPromise<Result<Value>>()
-        self.init(result: result.future)
-        
-        let promise = Promise(future: self, result: result)
-        promise.do { try block(promise) }
+        self.init(context: nil, block)
     }
     
     @discardableResult
@@ -64,8 +60,8 @@ public extension Future {
         return self
     }
     
-    func async(_ context: @escaping ExecutionContext) -> Future {
-        return .init(context: context) { promise in
+    func changeContext(_ context: @escaping ExecutionContext) -> Future {
+        return Future(context: context) { promise in
             promise.observe(self)
         }
     }

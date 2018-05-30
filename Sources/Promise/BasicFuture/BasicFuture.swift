@@ -74,8 +74,8 @@ public extension BasicFuture {
         return self
     }
     
-    func async(_ context: @escaping ExecutionContext) -> BasicFuture {
-        return .init(context: context) { promise in
+    func changeContext(_ context: @escaping ExecutionContext) -> BasicFuture {
+        return BasicFuture(context: context) { promise in
             then(promise.fulfill)
         }
     }

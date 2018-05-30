@@ -39,6 +39,18 @@ public extension Future {
         }
     }
     
+    func async(_ context: @escaping ExecutionContext) -> Future {
+        return Future { promise in
+            then { value in
+                context { promise.fulfill(with: value) }
+            }
+            
+            `catch` { error in
+                context { promise.reject(with: error) }
+            }
+        }
+    }
+    
     func transformError(_ transform: @escaping (Promise<Value>, Error) throws -> Void) -> Future {
         return .init { promise in
             then(promise.fulfill)
