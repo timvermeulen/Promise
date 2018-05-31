@@ -2,8 +2,8 @@ import Foundation
 
 public extension Future {
     convenience init(asyncOn queue: DispatchQueue, _ block: @escaping () throws -> Value) {
-        self.init { promise in
-            queue.async { promise.resolve(block) }
+        self.init { resolver in
+            queue.async { resolver.resolve(block) }
         }
     }
     
@@ -40,9 +40,9 @@ public extension Future {
 
 public extension URLSession {
     func dataTask(with request: URLRequest) -> Future<(data: Data, response: HTTPURLResponse)> {
-        return Future { promise in
+        return Future { resolver in
             let task = dataTask(with: request) { data, response, error in
-                promise.resolve {
+                resolver.resolve {
                     if let data = data, let response = response as? HTTPURLResponse {
                         return (data, response)
                     } else if let error = error {

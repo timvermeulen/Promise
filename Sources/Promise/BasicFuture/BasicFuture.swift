@@ -14,9 +14,9 @@ private extension BasicFuture {
         case fulfilled(with: Value)
     }
     
-    convenience init(context: ExecutionContext?, _ block: (BasicPromise<Value>) -> Void) {
+    convenience init(context: ExecutionContext?, _ block: (BasicResolver<Value>) -> Void) {
         self.init(context: context)
-        block(BasicPromise(future: self))
+        block(BasicResolver(future: self))
     }
     
     func perform(_ block: @escaping () -> Void) {
@@ -48,7 +48,7 @@ public extension BasicFuture {
         return BasicFuture(context: nil)
     }
     
-    convenience init(_ block: (BasicPromise<Value>) -> Void) {
+    convenience init(_ block: (BasicResolver<Value>) -> Void) {
         self.init(context: nil, block)
     }
     
@@ -75,8 +75,8 @@ public extension BasicFuture {
     }
     
     func changeContext(_ context: @escaping ExecutionContext) -> BasicFuture {
-        return BasicFuture(context: context) { promise in
-            then(promise.fulfill)
+        return BasicFuture(context: context) { resolver in
+            then(resolver.fulfill)
         }
     }
 }

@@ -7,35 +7,35 @@ public extension BasicFuture {
         return BasicFuture { value }
     }
     
-    func transform<T>(_ transform: @escaping (BasicPromise<T>, Value) -> Void) -> BasicFuture<T> {
-        return .init { promise in
-            then { value in transform(promise, value) }
+    func transform<T>(_ transform: @escaping (BasicResolver<T>, Value) -> Void) -> BasicFuture<T> {
+        return .init { resolver in
+            then { value in transform(resolver, value) }
         }
     }
     
     func map<T>(_ transform: @escaping (Value) -> T) -> BasicFuture<T> {
-        return self.transform { promise, value in
-            promise.fulfill(with: transform(value))
+        return self.transform { resolver, value in
+            resolver.fulfill(with: transform(value))
         }
     }
     
     func flatMap<T>(_ transform: @escaping (Value) -> BasicFuture<T>) -> BasicFuture<T> {
-        return self.transform { promise, value in
-            transform(value).then(promise.fulfill)
+        return self.transform { resolver, value in
+            transform(value).then(resolver.fulfill)
         }
     }
     
     func async(_ context: @escaping ExecutionContext) -> BasicFuture {
-        return transform { promise, value in
-            context { promise.fulfill(with: value) }
+        return transform { resolver, value in
+            context { resolver.fulfill(with: value) }
         }
     }
 }
 
 func race<T>(_ left: BasicFuture<T>, _ right: BasicFuture<T>) -> BasicFuture<T> {
-    return BasicFuture { promise in
-        left.then(promise.fulfill)
-        right.then(promise.fulfill)
+    return BasicFuture { resolver in
+        left.then(resolver.fulfill)
+        right.then(resolver.fulfill)
     }
 }
 

@@ -11,7 +11,7 @@ final class PromiseThrowsTests: XCTestCase {
             }
         }
         
-        testExpectation() { fulfill in
+        testExpectation { fulfill in
             future.then { value in
                 XCTAssertFalse(value)
                 fulfill()
@@ -28,7 +28,7 @@ final class PromiseThrowsTests: XCTestCase {
             }
         }
         
-        testExpectation() { fulfill in
+        testExpectation { fulfill in
             future.catch { _ in
                 fulfill()
             }
@@ -44,7 +44,7 @@ final class PromiseThrowsTests: XCTestCase {
             }
         }
         
-        testExpectation() { fulfill in
+        testExpectation { fulfill in
             future.then { value in
                 XCTAssertFalse(value)
                 fulfill()
@@ -61,7 +61,7 @@ final class PromiseThrowsTests: XCTestCase {
             }
         }
         
-        testExpectation() { fulfill in
+        testExpectation { fulfill in
             future.catch { _ in
                 fulfill()
             }

@@ -1,10 +1,10 @@
 public final class Promise<Value> {
     public let future: Future<Value>
-    private let result: BasicPromise<Result<Value>>
+    private let resolver: Resolver<Value>
     
     init(future: Future<Value>, result: BasicPromise<Result<Value>>) {
         self.future = future
-        self.result = result
+        self.resolver = Resolver(result: result)
     }
 }
 
@@ -17,33 +17,28 @@ public extension Promise {
     }
     
     func fulfill(with value: Value) {
-        result.fulfill(with: .success(value))
+        resolver.fulfill(with: value)
     }
     
     func reject(with error: Error) {
-        result.fulfill(with: .failure(error))
+        resolver.reject(with: error)
     }
     
     func `do`(_ block: () throws -> Void) {
-        do {
-            try block()
-        } catch {
-            reject(with: error)
-        }
+        resolver.do(block)
     }
     
     func resolve(_ block: () throws -> Value) {
-        `do` { fulfill(with: try block()) }
+        resolver.resolve(block)
     }
     
     func observe(_ future: Future<Value>) {
-        future.then(fulfill)
-        future.catch(reject)
+        resolver.observe(future)
     }
 }
 
 extension Promise where Value == Void {
     public func fulfill() {
-        fulfill(with: ())
+        resolver.fulfill()
     }
 }

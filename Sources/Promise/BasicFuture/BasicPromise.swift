@@ -1,8 +1,10 @@
 public final class BasicPromise<Value> {
     public let future: BasicFuture<Value>
+    private let resolver: BasicResolver<Value>
     
     init(future: BasicFuture<Value>) {
         self.future = future
+        self.resolver = BasicResolver(future: future)
     }
 }
 
@@ -12,12 +14,12 @@ public extension BasicPromise {
     }
     
     func fulfill(with value: Value) {
-        future.fulfill(with: value)
+        resolver.fulfill(with: value)
     }
 }
 
-extension BasicPromise where Value == Void {
-    public func fulfill() {
-        fulfill(with: ())
+public extension BasicPromise where Value == Void {
+    func fulfill() {
+        resolver.fulfill()
     }
 }

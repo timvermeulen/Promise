@@ -34,8 +34,8 @@ final class PromiseAllTests: XCTestCase {
     }
     
     func testAllWithEmptyArray() {
-        let promises: [Future<Void>] = []
-        let final = promises.traverse()
+        let futures: [Future<Void>] = []
+        let final = futures.traverse()
         
         testExpectation { fulfill in
             final.then { value in
@@ -51,7 +51,7 @@ final class PromiseAllTests: XCTestCase {
         
         let final = [future1, future2].traverse()
         
-        testExpectation(description: "`Promise.all` should wait until multiple promises are fulfilled before returning.") { fulfill in
+        testExpectation { fulfill in
             final.then { _ in
                 XCTFail()
             }
@@ -72,7 +72,7 @@ final class PromiseAllTests: XCTestCase {
         
         let final = [future1, future2].traverse()
         
-        testExpectation(description: "`Promise.all` should wait until multiple promises are fulfilled before returning.") { fulfill in
+        testExpectation { fulfill in
             final.then { _ in
                 XCTFail()
             }
