@@ -7,7 +7,10 @@ public final class Future<Value> {
 }
 
 private extension Future {
-    convenience init(context: @escaping ExecutionContext, _ block: (Resolver<Value>) throws -> Void) {
+    convenience init(
+        context: @escaping ExecutionContext,
+        _ block: (Resolver<Value>) throws -> Void
+    ) {
         let result = BasicPromise<Result<Value>>()
         self.init(result: result.future.changeContext(context))
         
