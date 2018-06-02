@@ -127,7 +127,7 @@ private func _race<T>(_ left: Future<T>, _ right: Future<T>) -> Future<T> {
 public extension Sequence {
     /// Wait for all the futures you give it to fulfill, and once they have, fulfill itself
     /// with the array of all fulfilled values. Preserves the order of the futures.
-    func traverse<T>() -> Future<[T]> where Element == Future<T> {
+    func all<T>() -> Future<[T]> where Element == Future<T> {
         return reduce(.fulfilled(with: [])) {
             zip($0, $1).map { $0 + [$1] }
         }
