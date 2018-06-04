@@ -56,12 +56,6 @@ private func _race<T>(_ left: BasicFuture<T>, _ right: BasicFuture<T>) -> BasicF
 }
 
 public extension Sequence {
-    func traverse<T>() -> BasicFuture<[T]> where Element == BasicFuture<T> {
-        return reduce(.fulfilled(with: [])) {
-            zip($0, $1).map { $0 + [$1] }
-        }
-    }
-    
     func race<T>() -> BasicFuture<T> where Element == BasicFuture<T> {
         return reduce(.pending, _race)
     }

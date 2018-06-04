@@ -39,13 +39,12 @@ final class PromiseDelayTests: XCTestCase {
     
     
     func testTimeoutFunctionFails() {
-        let future = Future.fulfilled.delayed(by: 1)
-        let withTimeout = future.timedOut(after: 0.5, withError: SimpleError())
+        let future = Future<Void>.pending.timedOut(after: 0.5, withError: SimpleError())
         
-        withTimeout.assertIsPending()
+        future.assertIsPending()
         
         testExpectation { fulfill in
-            withTimeout.catch { _ in
+            future.catch { _ in
                 fulfill()
             }
         }

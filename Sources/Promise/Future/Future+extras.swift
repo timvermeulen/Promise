@@ -93,20 +93,20 @@ public func zip<A, B>(_ left: Future<A>, _ right: Future<B>) -> Future<(A, B)> {
     var rightValue: B?
     
     return Future { resolver in
-        left.then { value in
-            if let rightValue = rightValue {
-                resolver.fulfill(with: (value, rightValue))
-            } else {
-                leftValue = value
+        func check() {
+            if let leftValue = leftValue, let rightValue = rightValue {
+                resolver.fulfill(with: (leftValue, rightValue))
             }
         }
         
+        left.then { value in
+            leftValue = value
+            check()
+        }
+        
         right.then { value in
-            if let leftValue = leftValue {
-                resolver.fulfill(with: (leftValue, value))
-            } else {
-                rightValue = value
-            }
+            rightValue = value
+            check()
         }
         
         left.catch(resolver.reject)
@@ -125,16 +125,6 @@ private func _race<T>(_ left: Future<T>, _ right: Future<T>) -> Future<T> {
 }
 
 public extension Sequence {
-    /// Wait for all the futures you give it to fulfill, and once they have, fulfill itself
-    /// with the array of all fulfilled values. Preserves the order of the futures.
-    func all<T>() -> Future<[T]> where Element == Future<T> {
-        return reduce(.fulfilled(with: [])) {
-            zip($0, $1).map { $0 + [$1] }
-        }
-    }
-    
-    /// Fulfills or rejects with the first future that completes
-    /// (as opposed to waiting for all of them, like `.all` does).
     func race<T>() -> Future<T> where Element == Future<T> {
         return reduce(.pending, _race)
     }
