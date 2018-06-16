@@ -11,12 +11,7 @@ final class PromiseThrowsTests: XCTestCase {
             }
         }
         
-        testExpectation { fulfill in
-            future.then { value in
-                XCTAssertFalse(value)
-                fulfill()
-            }
-        }
+        assertIsFulfilled(future, with: false)
     }
     
     func testThrowsInMappingWithError() {
@@ -28,11 +23,7 @@ final class PromiseThrowsTests: XCTestCase {
             }
         }
         
-        testExpectation { fulfill in
-            future.catch { _ in
-                fulfill()
-            }
-        }
+        assertIsRejected(future)
     }
     
     func testThrowsInFlatmapping() {
@@ -44,12 +35,7 @@ final class PromiseThrowsTests: XCTestCase {
             }
         }
         
-        testExpectation { fulfill in
-            future.then { value in
-                XCTAssertFalse(value)
-                fulfill()
-            }
-        }
+        assertIsFulfilled(future, with: false)
     }
     
     func testThrowsInFlatmappingWithError() {
@@ -61,10 +47,6 @@ final class PromiseThrowsTests: XCTestCase {
             }
         }
         
-        testExpectation { fulfill in
-            future.catch { _ in
-                fulfill()
-            }
-        }
+        assertIsRejected(future)
     }
 }

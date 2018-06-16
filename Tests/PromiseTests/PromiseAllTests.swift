@@ -8,14 +8,8 @@ final class PromiseAllTests: XCTestCase {
         let future3 = Future.fulfilled(with: 3).delayed(by: 0.3)
         let future4 = Future.fulfilled(with: 4).delayed(by: 0.2)
         
-        let final = [future1, future2, future3, future4].all()
-        
-        testExpectation { fulfill in
-            final.then { value in
-                XCTAssertEqual(value, [1, 2, 3, 4])
-                fulfill()
-            }
-        }
+        let all = [future1, future2, future3, future4].all()
+        assertWillBeFulfilled(all, with: [1, 2, 3, 4])
     }
     
     func testAllWithPreFulfilledValues() {
@@ -23,25 +17,16 @@ final class PromiseAllTests: XCTestCase {
         let future2 = Future.fulfilled(with: 2)
         let future3 = Future.fulfilled(with: 3)
         
-        let final = [future1, future2, future3].all()
-        
-        testExpectation { fulfill in
-            final.then { value in
-                XCTAssertEqual(value, [1, 2, 3])
-                fulfill()
-            }
-        }
+        let all = [future1, future2, future3].all()
+        assertIsFulfilled(all, with: [1, 2, 3])
     }
     
     func testAllWithEmptyArray() {
         let futures: [Future<Void>] = []
-        let final = futures.all()
+        let all = futures.all()
         
-        testExpectation { fulfill in
-            final.then { value in
-                XCTAssert(value.isEmpty)
-                fulfill()
-            }
+        testCurrentValue(of: all) { value in
+            XCTAssert(value.isEmpty)
         }
     }
     
@@ -49,41 +34,15 @@ final class PromiseAllTests: XCTestCase {
         let future1 = Future.fulfilled
         let future2 = Future<Void>.rejected(with: SimpleError()).delayed(by: 0.5)
         
-        let final = [future1, future2].all()
-        
-        testExpectation { fulfill in
-            final.then { _ in
-                XCTFail()
-            }
-            
-            final.catch { _ in
-                fulfill()
-            }
-            
-            final.then { _ in
-                XCTFail()
-            }
-        }
+        let all = [future1, future2].all()
+        assertWillBeRejected(all)
     }
     
     func testAllWithRejectionHappeningLast() {
         let future1 = Future.fulfilled
         let future2 = Future<Void>.rejected(with: SimpleError()).delayed(by: 0.5)
         
-        let final = [future1, future2].all()
-        
-        testExpectation { fulfill in
-            final.then { _ in
-                XCTFail()
-            }
-            
-            final.catch { _ in
-                fulfill()
-            }
-            
-            final.then { _ in
-                XCTFail()
-            }
-        }
+        let all = [future1, future2].all()
+        assertWillBeRejected(all)
     }
 }

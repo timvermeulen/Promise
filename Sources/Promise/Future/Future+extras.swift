@@ -93,20 +93,20 @@ public func zip<A, B>(_ left: Future<A>, _ right: Future<B>) -> Future<(A, B)> {
     var rightValue: B?
     
     return Future { resolver in
-        func check() {
-            if let leftValue = leftValue, let rightValue = rightValue {
-                resolver.fulfill(with: (leftValue, rightValue))
+        left.then { value in
+            if let rightValue = rightValue {
+                resolver.fulfill(with: (value, rightValue))
+            } else {
+                leftValue = value
             }
         }
         
-        left.then { value in
-            leftValue = value
-            check()
-        }
-        
         right.then { value in
-            rightValue = value
-            check()
+            if let leftValue = leftValue {
+                resolver.fulfill(with: (leftValue, value))
+            } else {
+                rightValue = value
+            }
         }
         
         left.catch(resolver.reject)
