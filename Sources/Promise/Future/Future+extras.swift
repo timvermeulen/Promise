@@ -81,19 +81,41 @@ public extension Future {
     }
 }
 
-public func race<T>(_ left: Future<T>, _ right: Future<T>) -> Future<T> {
+public func race<T>(_ lhs: Future<T>, _ rhs: Future<T>) -> Future<T> {
     return Future { resolver in
-        resolver.observe(left)
-        resolver.observe(right)
+        resolver.observe(lhs)
+        resolver.observe(rhs)
     }
 }
 
-public func zip<A, B>(_ left: Future<A>, _ right: Future<B>) -> Future<(A, B)> {
+public func raceValues<T>(_ lhs: Future<T>, _ rhs: Future<T>) -> Future<T> {
+    var hasFailed = false
+    
+    return Future { resolver in
+        func handleError(_ error: Error) {
+            if hasFailed {
+                resolver.reject(with: error)
+            } else {
+                hasFailed = true
+            }
+        }
+        
+        lhs
+            .then(resolver.fulfill)
+            .catch(handleError)
+        
+        rhs
+            .then(resolver.fulfill)
+            .catch(handleError)
+    }
+}
+
+public func zip<A, B>(_ lhs: Future<A>, _ rhs: Future<B>) -> Future<(A, B)> {
     var leftValue: A?
     var rightValue: B?
     
     return Future { resolver in
-        left.then { value in
+        lhs.then { value in
             if let rightValue = rightValue {
                 resolver.fulfill(with: (value, rightValue))
             } else {
@@ -101,7 +123,7 @@ public func zip<A, B>(_ left: Future<A>, _ right: Future<B>) -> Future<(A, B)> {
             }
         }
         
-        right.then { value in
+        rhs.then { value in
             if let leftValue = leftValue {
                 resolver.fulfill(with: (leftValue, value))
             } else {
@@ -109,8 +131,8 @@ public func zip<A, B>(_ left: Future<A>, _ right: Future<B>) -> Future<(A, B)> {
             }
         }
         
-        left.catch(resolver.reject)
-        right.catch(resolver.reject)
+        lhs.catch(resolver.reject)
+        rhs.catch(resolver.reject)
     }
 }
 
@@ -120,12 +142,20 @@ public extension Future where Value == Void {
     }
 }
 
-private func _race<T>(_ left: Future<T>, _ right: Future<T>) -> Future<T> {
-    return race(left, right)
+private func _race<T>(_ lhs: Future<T>, _ rhs: Future<T>) -> Future<T> {
+    return race(lhs, rhs)
+}
+
+private func _raceValues<T>(_ lhs: Future<T>, _ rhs: Future<T>) -> Future<T> {
+    return raceValues(lhs, rhs)
 }
 
 public extension Sequence {
     func race<T>() -> Future<T> where Element == Future<T> {
         return reduce(.pending, _race)
+    }
+    
+    func raceValues<T>() -> Future<T> where Element == Future<T> {
+        return reduce(.pending, _raceValues)
     }
 }

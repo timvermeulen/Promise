@@ -32,16 +32,16 @@ public extension BasicFuture {
     }
 }
 
-func race<T>(_ left: BasicFuture<T>, _ right: BasicFuture<T>) -> BasicFuture<T> {
+func race<T>(_ lhs: BasicFuture<T>, _ rhs: BasicFuture<T>) -> BasicFuture<T> {
     return BasicFuture { resolver in
-        left.then(resolver.fulfill)
-        right.then(resolver.fulfill)
+        lhs.then(resolver.fulfill)
+        rhs.then(resolver.fulfill)
     }
 }
 
-public func zip<A, B>(_ left: BasicFuture<A>, _ right: BasicFuture<B>) -> BasicFuture<(A, B)> {
-    return left.flatMap { x in
-        right.map { y in (x, y) }
+public func zip<A, B>(_ lhs: BasicFuture<A>, _ rhs: BasicFuture<B>) -> BasicFuture<(A, B)> {
+    return lhs.flatMap { x in
+        rhs.map { y in (x, y) }
     }
 }
 
@@ -51,8 +51,8 @@ public extension BasicFuture where Value == Void {
     }
 }
 
-private func _race<T>(_ left: BasicFuture<T>, _ right: BasicFuture<T>) -> BasicFuture<T> {
-    return race(left, right)
+private func _race<T>(_ lhs: BasicFuture<T>, _ rhs: BasicFuture<T>) -> BasicFuture<T> {
+    return race(lhs, rhs)
 }
 
 public extension Sequence {
