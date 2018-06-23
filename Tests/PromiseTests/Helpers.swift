@@ -3,34 +3,30 @@ import Promise
 
 private let defaultTimeout: TimeInterval = 1
 
-private extension BasicFuture {
-    var value: Value? {
-        var value: Value?
-        then { value = $0 }
-        return value
-    }
-}
-
-private extension Future {
-    var value: Value? {
-        var value: Value?
-        then { value = $0 }
-        return value
-    }
-    
-    var error: Error? {
-        var error: Error?
-        `catch` { error = $0 }
-        return error
-    }
-}
-
 extension XCTestCase {
     func testExpectation(timeout: TimeInterval = defaultTimeout, isInverted: Bool = false, block: (_ fulfill: @escaping () -> Void) throws -> Void) rethrows {
         let expectation = self.expectation(description: "")
         expectation.isInverted = isInverted
         try block { [weak expectation] in expectation?.fulfill() }
         wait(for: [expectation], timeout: timeout)
+    }
+    
+    func value<Value>(of future: BasicFuture<Value>) -> Value? {
+        var value: Value?
+        future.then { value = $0 }
+        return value
+    }
+    
+    func value<Value>(of future: Future<Value>) -> Value? {
+        var value: Value?
+        future.then { value = $0 }
+        return value
+    }
+    
+    func error<Value>(of future: Future<Value>) -> Error? {
+        var error: Error?
+        future.catch { error = $0 }
+        return error
     }
     
     func testValue<Value>(of future: BasicFuture<Value>, timeout: TimeInterval = defaultTimeout, _ block: @escaping (Value) -> Void) {
@@ -71,7 +67,7 @@ extension XCTestCase {
     func testCurrentValue<Value>(of future: BasicFuture<Value>, file: StaticString = #file, line: UInt = #line, _ block: (Value) -> Void) {
         assertIsFulfilled(future, file: file, line: line)
         
-        if let value = future.value {
+        if let value = value(of: future) {
             block(value)
         }
     }
@@ -79,7 +75,7 @@ extension XCTestCase {
     func testCurrentValue<Value>(of future: Future<Value>, file: StaticString = #file, line: UInt = #line, _ block: (Value) -> Void) {
         assertIsFulfilled(future, file: file, line: line)
         
-        if let value = future.value {
+        if let value = value(of: future) {
             block(value)
         }
     }
@@ -87,7 +83,7 @@ extension XCTestCase {
     func testCurrentError<Value>(of future: Future<Value>, file: StaticString = #file, line: UInt = #line, _ block: (Error) -> Void) {
         assertIsRejected(future, file: file, line: line)
         
-        if let error = future.error {
+        if let error = error(of: future) {
             block(error)
         }
     }
@@ -135,40 +131,40 @@ extension XCTestCase {
     }
     
     func assertIsPending<Value>(_ future: BasicFuture<Value>, file: StaticString = #file, line: UInt = #line) {
-        XCTAssertNil(future.value, file: file, line: line)
+        XCTAssertNil(value(of: future), file: file, line: line)
     }
     
     func assertIsFulfilled<Value>(_ future: BasicFuture<Value>, file: StaticString = #file, line: UInt = #line) {
-        XCTAssertNotNil(future.value, file: file, line: line)
+        XCTAssertNotNil(value(of: future), file: file, line: line)
     }
     
     func assertIsFulfilled<Value: Equatable>(_ future: BasicFuture<Value>, with expectedValue: Value, file: StaticString = #file, line: UInt = #line) {
-        XCTAssertEqual(future.value, expectedValue, file: file, line: line)
+        XCTAssertEqual(value(of: future), expectedValue, file: file, line: line)
     }
     
     func assertIsPending<Value>(_ future: Future<Value>, file: StaticString = #file, line: UInt = #line) {
-        XCTAssertNil(future.value, file: file, line: line)
-        XCTAssertNil(future.error, file: file, line: line)
+        XCTAssertNil(value(of: future), file: file, line: line)
+        XCTAssertNil(error(of: future), file: file, line: line)
     }
     
     func assertIsFulfilled<Value>(_ future: Future<Value>, file: StaticString = #file, line: UInt = #line) {
-        XCTAssertNotNil(future.value, file: file, line: line)
-        XCTAssertNil(future.error, file: file, line: line)
+        XCTAssertNotNil(value(of: future), file: file, line: line)
+        XCTAssertNil(error(of: future), file: file, line: line)
     }
     
     func assertIsFulfilled<Value: Equatable>(_ future: Future<Value>, with expectedValue: Value, file: StaticString = #file, line: UInt = #line) {
-        XCTAssertEqual(future.value, expectedValue, file: file, line: line)
-        XCTAssertNil(future.error, file: file, line: line)
+        XCTAssertEqual(value(of: future), expectedValue, file: file, line: line)
+        XCTAssertNil(error(of: future), file: file, line: line)
     }
     
     func assertIsRejected<Value>(_ future: Future<Value>, file: StaticString = #file, line: UInt = #line) {
-        XCTAssertNil(future.value, file: file, line: line)
-        XCTAssertNotNil(future.error, file: file, line: line)
+        XCTAssertNil(value(of: future), file: file, line: line)
+        XCTAssertNotNil(error(of: future), file: file, line: line)
     }
     
     func assertIsRejected<Value, Error: Swift.Error & Equatable>(_ future: Future<Value>, with expectedError: Error, file: StaticString = #file, line: UInt = #line) {
-        XCTAssertNil(future.value, file: file, line: line)
-        XCTAssertEqual(future.error as? Error, expectedError, file: file, line: line)
+        XCTAssertNil(value(of: future), file: file, line: line)
+        XCTAssertEqual(error(of: future) as? Error, expectedError, file: file, line: line)
     }
 }
 

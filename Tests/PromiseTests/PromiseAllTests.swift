@@ -8,7 +8,7 @@ final class PromiseAllTests: XCTestCase {
         let future3 = Future.fulfilled(with: 3).delayed(by: 0.3)
         let future4 = Future.fulfilled(with: 4).delayed(by: 0.2)
         
-        let all = [future1, future2, future3, future4].all()
+        let all = [future1, future2, future3, future4].sequence()
         assertWillBeFulfilled(all, with: [1, 2, 3, 4])
     }
     
@@ -17,13 +17,13 @@ final class PromiseAllTests: XCTestCase {
         let future2 = Future.fulfilled(with: 2)
         let future3 = Future.fulfilled(with: 3)
         
-        let all = [future1, future2, future3].all()
+        let all = [future1, future2, future3].sequence()
         assertIsFulfilled(all, with: [1, 2, 3])
     }
     
     func testAllWithEmptyArray() {
         let futures: [Future<Void>] = []
-        let all = futures.all()
+        let all = futures.sequence()
         
         testCurrentValue(of: all) { value in
             XCTAssert(value.isEmpty)
@@ -34,7 +34,7 @@ final class PromiseAllTests: XCTestCase {
         let future1 = Future.fulfilled
         let future2 = Future<Void>.rejected(with: SimpleError()).delayed(by: 0.5)
         
-        let all = [future1, future2].all()
+        let all = [future1, future2].sequence()
         assertWillBeRejected(all)
     }
     
@@ -42,7 +42,7 @@ final class PromiseAllTests: XCTestCase {
         let future1 = Future.fulfilled
         let future2 = Future<Void>.rejected(with: SimpleError()).delayed(by: 0.5)
         
-        let all = [future1, future2].all()
+        let all = [future1, future2].sequence()
         assertWillBeRejected(all)
     }
 }

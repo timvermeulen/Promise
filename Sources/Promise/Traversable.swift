@@ -13,6 +13,10 @@ public extension Optional {
         }
     }
     
+    func sequence<T>() -> BasicFuture<T?> where Wrapped == BasicFuture<T> {
+        return traverse { $0 }
+    }
+    
     func traverse<T>(_ transform: (Wrapped) throws -> Future<T>) -> Future<T?> {
         return Future { resolver in
             if let wrapped = self {
@@ -22,6 +26,10 @@ public extension Optional {
             }
         }
     }
+    
+    func sequence<T>() -> Future<T?> where Wrapped == Future<T> {
+        return traverse { $0 }
+    }
 }
 
 public extension Sequence {
@@ -29,6 +37,10 @@ public extension Sequence {
         return reduce(.fulfilled(with: [])) {
             zip($0, transform($1)).map { $0 + [$1] }
         }
+    }
+    
+    func sequence<T>() -> BasicFuture<[T]> where Element == BasicFuture<T> {
+        return traverse { $0 }
     }
     
     func traverse<T>(_ transform: (Element) throws -> Future<T>) -> Future<[T]> {
@@ -41,11 +53,7 @@ public extension Sequence {
         }
     }
     
-    func all<T>() -> BasicFuture<[T]> where Element == BasicFuture<T> {
-        return traverse { $0 }
-    }
-    
-    func all<T>() -> Future<[T]> where Element == Future<T> {
+    func sequence<T>() -> Future<[T]> where Element == Future<T> {
         return traverse { $0 }
     }
 }

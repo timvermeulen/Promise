@@ -45,21 +45,23 @@ final class PromiseTests: XCTestCase {
     }
     
     func testMap() {
-        let future = Future.fulfilled(with: "someString")
+        let string = "someString"
+        let future = Future.fulfilled(with: string)
             .map { $0.count }
             .map { $0 * 2 }
         
-        assertIsFulfilled(future, with: 20)
+        assertIsFulfilled(future, with: string.count * 2)
     }
     
     func testFlatMap() {
-        let future1 = Future.fulfilled(with: "hello").delayed(by: 0.05)
+        let string = "hello"
+        let future1 = Future.fulfilled(with: string).delayed(by: 0.05)
 
         let future2 = future1.flatMap { value in
             Future.fulfilled(with: value.count).delayed(by: 0.05)
         }
         
-        assertWillBeFulfilled(future2, with: 5)
+        assertWillBeFulfilled(future2, with: string.count)
     }
 
     func testDoubleResolve() {
