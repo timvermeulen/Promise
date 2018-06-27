@@ -115,24 +115,25 @@ public func zip<A, B>(_ lhs: Future<A>, _ rhs: Future<B>) -> Future<(A, B)> {
     var rightValue: B?
     
     return Future { resolver in
-        lhs.then { value in
-            if let rightValue = rightValue {
-                resolver.fulfill(with: (value, rightValue))
-            } else {
-                leftValue = value
+        lhs
+            .then { value in
+                if let rightValue = rightValue {
+                    resolver.fulfill(with: (value, rightValue))
+                } else {
+                    leftValue = value
+                }
             }
-        }
+            .catch(resolver.reject)
         
-        rhs.then { value in
-            if let leftValue = leftValue {
-                resolver.fulfill(with: (leftValue, value))
-            } else {
-                rightValue = value
+        rhs
+            .then { value in
+                if let leftValue = leftValue {
+                    resolver.fulfill(with: (leftValue, value))
+                } else {
+                    rightValue = value
+                }
             }
-        }
-        
-        lhs.catch(resolver.reject)
-        rhs.catch(resolver.reject)
+            .catch(resolver.reject)
     }
 }
 

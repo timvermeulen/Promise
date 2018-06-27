@@ -11,6 +11,10 @@ extension XCTestCase {
         wait(for: [expectation], timeout: timeout)
     }
     
+    func wait(_ timeout: TimeInterval = defaultTimeout) {
+        testExpectation(timeout: timeout, isInverted: true) { _ in }
+    }
+    
     func value<Value>(of future: BasicFuture<Value>) -> Value? {
         var value: Value?
         future.then { value = $0 }
