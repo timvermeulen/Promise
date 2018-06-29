@@ -1,16 +1,16 @@
 import Foundation
 
 public extension BasicFuture {
+    convenience init(asyncOn queue: DispatchQueue, _ block: @escaping (BasicResolver<Value>) -> Void) {
+        self.init(asyncOn: queue.asyncContext, block)
+    }
+    
     convenience init(asyncOn queue: DispatchQueue, _ block: @escaping () -> Value) {
-        self.init { resolver in
-            queue.async { resolver.fulfill(with: block()) }
-        }
+        self.init(asyncOn: queue.asyncContext, block)
     }
     
     func on(_ queue: DispatchQueue) -> BasicFuture {
-        return changeContext { resolve in
-            queue.async(execute: resolve)
-        }
+        return changeContext(queue.asyncContext)
     }
     
     func asyncAfter(deadline: DispatchTime, on queue: DispatchQueue) -> BasicFuture {

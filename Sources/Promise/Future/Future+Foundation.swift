@@ -1,10 +1,18 @@
 import Foundation
 
 public extension Future {
-    convenience init(asyncOn queue: DispatchQueue, _ block: @escaping () throws -> Value) {
-        self.init { resolver in
-            queue.async { resolver.resolve(block) }
-        }
+    convenience init(
+        asyncOn queue: DispatchQueue,
+        _ block: @escaping (Resolver<Value>) throws -> Void
+    ) {
+        self.init(asyncOn: queue.asyncContext, block)
+    }
+    
+    convenience init(
+        asyncOn queue: DispatchQueue,
+        _ block: @escaping () throws -> Value
+    ) {
+        self.init(asyncOn: queue.asyncContext, block)
     }
     
     func on(_ queue: DispatchQueue) -> Future {

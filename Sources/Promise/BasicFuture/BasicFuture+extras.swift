@@ -3,6 +3,18 @@ public extension BasicFuture {
         self.init { $0.fulfill(with: block()) }
     }
     
+    convenience init(asyncOn context: ExecutionContext, _ block: @escaping (BasicResolver<Value>) -> Void) {
+        self.init { resolver in
+            context { block(resolver) }
+        }
+    }
+    
+    convenience init(asyncOn context: ExecutionContext, _ block: @escaping () -> Value) {
+        self.init(asyncOn: context) { resolver in
+            resolver.fulfill(with: block())
+        }
+    }
+    
     static func fulfilled(with value: Value) -> BasicFuture {
         return BasicFuture { value }
     }

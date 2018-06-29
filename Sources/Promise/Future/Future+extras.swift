@@ -5,6 +5,20 @@ public extension Future {
         }
     }
     
+    convenience init(asyncOn context: ExecutionContext, _ block: @escaping (Resolver<Value>) throws -> Void) {
+        self.init { resolver in
+            context {
+                resolver.do { try block(resolver) }
+            }
+        }
+    }
+    
+    convenience init(asyncOn context: ExecutionContext, _ block: @escaping () throws -> Value) {
+        self.init(asyncOn: context) { resolver in
+            resolver.resolve(block)
+        }
+    }
+    
     static func fulfilled(with value: Value) -> Future {
         return Future { resolver in
             resolver.fulfill(with: value)
