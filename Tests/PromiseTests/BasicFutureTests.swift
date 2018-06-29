@@ -8,17 +8,17 @@ final class BasicFutureTests: XCTestCase {
     }
     
     func testThenImmediateFulfill() {
-        let promise = BasicPromise<Void>()
-        assertIsPending(promise.future)
+        let (future, promise) = BasicFuture<Void>.make()
+        assertIsPending(future)
         promise.fulfill()
-        assertIsFulfilled(promise.future)
+        assertIsFulfilled(future)
     }
     
     func testThenDelayedFulfill() {
-        let promise = BasicPromise<Void>()
+        let (future, promise) = BasicFuture<Void>.make()
         wait(0.01)
         promise.fulfill()
-        assertIsFulfilled(promise.future)
+        assertIsFulfilled(future)
     }
     
     func testThenCalledOnlyOnce() {

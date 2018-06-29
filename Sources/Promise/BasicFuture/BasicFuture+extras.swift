@@ -3,15 +3,15 @@ public extension BasicFuture {
         self.init { $0.fulfill(with: block()) }
     }
     
-    convenience init(asyncOn context: ExecutionContext, _ block: @escaping (BasicResolver<Value>) -> Void) {
-        self.init { resolver in
-            context { block(resolver) }
+    convenience init(asyncOn context: ExecutionContext, _ block: @escaping (BasicPromise<Value>) -> Void) {
+        self.init { promise in
+            context { block(promise) }
         }
     }
     
     convenience init(asyncOn context: ExecutionContext, _ block: @escaping () -> Value) {
-        self.init(asyncOn: context) { resolver in
-            resolver.fulfill(with: block())
+        self.init(asyncOn: context) { promise in
+            promise.fulfill(with: block())
         }
     }
     
@@ -19,35 +19,35 @@ public extension BasicFuture {
         return BasicFuture { value }
     }
     
-    func transform<T>(_ transform: @escaping (BasicResolver<T>, Value) -> Void) -> BasicFuture<T> {
-        return .init { resolver in
-            then { value in transform(resolver, value) }
+    func transform<T>(_ transform: @escaping (BasicPromise<T>, Value) -> Void) -> BasicFuture<T> {
+        return .init { promise in
+            then { value in transform(promise, value) }
         }
     }
     
     func map<T>(_ transform: @escaping (Value) -> T) -> BasicFuture<T> {
-        return self.transform { resolver, value in
-            resolver.fulfill(with: transform(value))
+        return self.transform { promise, value in
+            promise.fulfill(with: transform(value))
         }
     }
     
     func flatMap<T>(_ transform: @escaping (Value) -> BasicFuture<T>) -> BasicFuture<T> {
-        return self.transform { resolver, value in
-            transform(value).then(resolver.fulfill)
+        return self.transform { promise, value in
+            transform(value).then(promise.fulfill)
         }
     }
     
     func async(_ context: @escaping ExecutionContext) -> BasicFuture {
-        return transform { resolver, value in
-            context { resolver.fulfill(with: value) }
+        return transform { promise, value in
+            context { promise.fulfill(with: value) }
         }
     }
 }
 
 func race<T>(_ lhs: BasicFuture<T>, _ rhs: BasicFuture<T>) -> BasicFuture<T> {
-    return BasicFuture { resolver in
-        lhs.then(resolver.fulfill)
-        rhs.then(resolver.fulfill)
+    return BasicFuture { promise in
+        lhs.then(promise.fulfill)
+        rhs.then(promise.fulfill)
     }
 }
 

@@ -1,44 +1,40 @@
 public final class Promise<Value> {
-    public let future: Future<Value>
-    private let resolver: Resolver<Value>
+    private let result: BasicPromise<Result<Value>>
     
-    init(future: Future<Value>, result: BasicPromise<Result<Value>>) {
-        self.future = future
-        self.resolver = Resolver(result: result)
+    init(result: BasicPromise<Result<Value>>) {
+        self.result = result
     }
 }
 
 public extension Promise {
-    convenience init() {
-        let result = BasicPromise<Result<Value>>()
-        let future = Future<Value>(result: result.future)
-        
-        self.init(future: future, result: result)
-    }
-    
     func fulfill(with value: Value) {
-        resolver.fulfill(with: value)
+        result.fulfill(with: .success(value))
     }
     
     func reject(with error: Error) {
-        resolver.reject(with: error)
+        result.fulfill(with: .failure(error))
     }
     
     func `do`(_ block: () throws -> Void) {
-        resolver.do(block)
+        do {
+            try block()
+        } catch {
+            reject(with: error)
+        }
     }
     
     func resolve(_ block: () throws -> Value) {
-        resolver.resolve(block)
+        `do` { fulfill(with: try block()) }
     }
     
     func observe(_ future: Future<Value>) {
-        resolver.observe(future)
+        future.then(fulfill)
+        future.catch(reject)
     }
 }
 
-extension Promise where Value == Void {
-    public func fulfill() {
-        resolver.fulfill()
+public extension Promise where Value == Void {
+    func fulfill() {
+        fulfill(with: ())
     }
 }

@@ -33,15 +33,15 @@ final class PromiseTests: XCTestCase {
     }
     
     func testFulfilled() {
-        let promise = Promise<Void>()
+        let (future, promise) = Future<Void>.make()
         promise.fulfill()
-        assertIsFulfilled(promise.future)
+        assertIsFulfilled(future)
     }
     
     func testRejected() {
-        let promise = Promise<Void>()
+        let (future, promise) = Future<Void>.make()
         promise.reject(with: SimpleError())
-        assertIsRejected(promise.future)
+        assertIsRejected(future)
     }
     
     func testMap() {
@@ -65,36 +65,36 @@ final class PromiseTests: XCTestCase {
     }
 
     func testDoubleResolve() {
-        let future = Future<Bool> { resolver in
-            resolver.fulfill(with: true)
-            resolver.fulfill(with: false)
+        let future = Future<Bool> { promise in
+            promise.fulfill(with: true)
+            promise.fulfill(with: false)
         }
 
         assertIsFulfilled(future, with: true)
     }
     
     func testRejectThenResolve() {
-        let future = Future<Void> { resolver in
-            resolver.reject(with: SimpleError())
-            resolver.fulfill()
+        let future = Future<Void> { promise in
+            promise.reject(with: SimpleError())
+            promise.fulfill()
         }
         
         assertIsRejected(future)
     }
     
     func testDoubleReject() {
-        let future = Future<Void> { resolver in
-            resolver.reject(with: SimpleError())
-            resolver.reject(with: SimpleError())
+        let future = Future<Void> { promise in
+            promise.reject(with: SimpleError())
+            promise.reject(with: SimpleError())
         }
         
         assertIsRejected(future)
     }
 
     func testResolveThenReject() {
-        let future = Future<Void> { resolver in
-            resolver.fulfill()
-            resolver.reject(with: SimpleError())
+        let future = Future<Void> { promise in
+            promise.fulfill()
+            promise.reject(with: SimpleError())
         }
         
         assertIsFulfilled(future)

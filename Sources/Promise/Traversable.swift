@@ -4,11 +4,11 @@
 
 public extension Optional {
     func traverse<T>(_ transform: (Wrapped) -> BasicFuture<T>) -> BasicFuture<T?> {
-        return BasicFuture { resolver in
+        return BasicFuture { promise in
             if let wrapped = self {
-                transform(wrapped).map { $0 }.then(resolver.fulfill)
+                transform(wrapped).map { $0 }.then(promise.fulfill)
             } else {
-                resolver.fulfill(with: nil)
+                promise.fulfill(with: nil)
             }
         }
     }
@@ -18,11 +18,11 @@ public extension Optional {
     }
     
     func traverse<T>(_ transform: (Wrapped) throws -> Future<T>) -> Future<T?> {
-        return Future { resolver in
+        return Future { promise in
             if let wrapped = self {
-                resolver.observe(try transform(wrapped).map { $0 })
+                promise.observe(try transform(wrapped).map { $0 })
             } else {
-                resolver.fulfill(with: nil)
+                promise.fulfill(with: nil)
             }
         }
     }

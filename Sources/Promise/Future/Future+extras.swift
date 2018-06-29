@@ -1,76 +1,76 @@
 public extension Future {
     convenience init(_ block: () throws -> Value) {
-        self.init { resolver in
-            resolver.resolve(block)
+        self.init { promise in
+            promise.resolve(block)
         }
     }
     
-    convenience init(asyncOn context: ExecutionContext, _ block: @escaping (Resolver<Value>) throws -> Void) {
-        self.init { resolver in
+    convenience init(asyncOn context: ExecutionContext, _ block: @escaping (Promise<Value>) throws -> Void) {
+        self.init { promise in
             context {
-                resolver.do { try block(resolver) }
+                promise.do { try block(promise) }
             }
         }
     }
     
     convenience init(asyncOn context: ExecutionContext, _ block: @escaping () throws -> Value) {
-        self.init(asyncOn: context) { resolver in
-            resolver.resolve(block)
+        self.init(asyncOn: context) { promise in
+            promise.resolve(block)
         }
     }
     
     static func fulfilled(with value: Value) -> Future {
-        return Future { resolver in
-            resolver.fulfill(with: value)
+        return Future { promise in
+            promise.fulfill(with: value)
         }
     }
     
     static func rejected(with error: Error) -> Future {
-        return Future { resolver in
-            resolver.reject(with: error)
+        return Future { promise in
+            promise.reject(with: error)
         }
     }
     
-    func transform<T>(_ transform: @escaping (Resolver<T>, Value) throws -> Void) -> Future<T> {
-        return .init { resolver in
+    func transform<T>(_ transform: @escaping (Promise<T>, Value) throws -> Void) -> Future<T> {
+        return .init { promise in
             then { value in
-                resolver.do { try transform(resolver, value) }
+                promise.do { try transform(promise, value) }
             }
             
-            `catch`(resolver.reject)
+            `catch`(promise.reject)
         }
     }
     
     func map<T>(_ transform: @escaping (Value) throws -> T) -> Future<T> {
-        return self.transform { resolver, value in
-            resolver.fulfill(with: try transform(value))
+        return self.transform { promise, value in
+            promise.fulfill(with: try transform(value))
         }
     }
     
     func flatMap<T>(_ transform: @escaping (Value) throws -> Future<T>) -> Future<T> {
-        return self.transform { resolver, value in
-            resolver.observe(try transform(value))
+        return self.transform { promise, value in
+            promise.observe(try transform(value))
         }
     }
     
     func async(_ context: @escaping ExecutionContext) -> Future {
-        return Future { resolver in
+        return Future { promise in
             then { value in
-                context { resolver.fulfill(with: value) }
+                context { promise.fulfill(with: value) }
             }
             
             `catch` { error in
-                context { resolver.reject(with: error) }
+                context { promise.reject(with: error) }
             }
         }
     }
     
-    func transformError(_ transform: @escaping (Resolver<Value>, Error) throws -> Void) -> Future {
-        return .init { resolver in
-            then(resolver.fulfill)
+    func transformError(_ transform: @escaping (Promise<Value>, Error) throws -> Void) -> Future {
+        return .init { promise in
+            then(promise.fulfill)
             
             `catch` { error in
-                resolver.do { try transform(resolver, error) }
+                promise.do { try transform(promise, error) }
             }
         }
     }
@@ -82,8 +82,8 @@ public extension Future {
     }
     
     func recover(_ recovery: @escaping (Error) throws -> Future) -> Future {
-        return transformError { resolver, error in
-            resolver.observe(try recovery(error))
+        return transformError { promise, error in
+            promise.observe(try recovery(error))
         }
     }
     
@@ -96,30 +96,30 @@ public extension Future {
 }
 
 public func race<T>(_ lhs: Future<T>, _ rhs: Future<T>) -> Future<T> {
-    return Future { resolver in
-        resolver.observe(lhs)
-        resolver.observe(rhs)
+    return Future { promise in
+        promise.observe(lhs)
+        promise.observe(rhs)
     }
 }
 
 public func raceValues<T>(_ lhs: Future<T>, _ rhs: Future<T>) -> Future<T> {
     var hasFailed = false
     
-    return Future { resolver in
+    return Future { promise in
         func handleError(_ error: Error) {
             if hasFailed {
-                resolver.reject(with: error)
+                promise.reject(with: error)
             } else {
                 hasFailed = true
             }
         }
         
         lhs
-            .then(resolver.fulfill)
+            .then(promise.fulfill)
             .catch(handleError)
         
         rhs
-            .then(resolver.fulfill)
+            .then(promise.fulfill)
             .catch(handleError)
     }
 }
@@ -128,26 +128,26 @@ public func zip<A, B>(_ lhs: Future<A>, _ rhs: Future<B>) -> Future<(A, B)> {
     var leftValue: A?
     var rightValue: B?
     
-    return Future { resolver in
+    return Future { promise in
         lhs
             .then { value in
                 if let rightValue = rightValue {
-                    resolver.fulfill(with: (value, rightValue))
+                    promise.fulfill(with: (value, rightValue))
                 } else {
                     leftValue = value
                 }
             }
-            .catch(resolver.reject)
+            .catch(promise.reject)
         
         rhs
             .then { value in
                 if let leftValue = leftValue {
-                    resolver.fulfill(with: (leftValue, value))
+                    promise.fulfill(with: (leftValue, value))
                 } else {
                     rightValue = value
                 }
             }
-            .catch(resolver.reject)
+            .catch(promise.reject)
     }
 }
 
