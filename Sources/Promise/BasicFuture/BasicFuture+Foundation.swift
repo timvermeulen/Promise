@@ -1,8 +1,8 @@
 import Foundation
 
 public extension BasicFuture {
-    convenience init(asyncOn queue: DispatchQueue, _ block: @escaping (BasicPromise<Value>) -> Void) {
-        self.init(asyncOn: queue.asyncContext, block)
+    convenience init(asyncOn queue: DispatchQueue, _ process: @escaping (BasicPromise<Value>) -> Void) {
+        self.init(asyncOn: queue.asyncContext, process)
     }
     
     convenience init(asyncOn queue: DispatchQueue, _ block: @escaping () -> Value) {
@@ -24,9 +24,22 @@ public extension BasicFuture {
         return map { ($0, Date().timeIntervalSince(start)) }
     }
     
+    func await() -> Value {
+        let semaphore = DispatchSemaphore(value: 0)
+        var value: Value?
+        
+        then {
+            value = $0
+            semaphore.signal()
+        }
+        
+        semaphore.wait()
+        return value!
+    }
+    
     @available(macOS 10.12, iOS 10.0, *)
     func delayed(by interval: TimeInterval) -> BasicFuture {
-        return async { resolve in
+        return on(.main).async { resolve in
             Timer.scheduledTimer(withTimeInterval: interval, repeats: false) { _ in resolve() }
         }
     }

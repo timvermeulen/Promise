@@ -5,10 +5,10 @@ public extension Future {
         }
     }
     
-    convenience init(asyncOn context: ExecutionContext, _ block: @escaping (Promise<Value>) throws -> Void) {
+    convenience init(asyncOn context: ExecutionContext, _ process: @escaping (Promise<Value>) throws -> Void) {
         self.init { promise in
             context {
-                promise.do { try block(promise) }
+                promise.do { try process(promise) }
             }
         }
     }
@@ -31,13 +31,11 @@ public extension Future {
         }
     }
     
-    func transform<T>(_ transform: @escaping (Promise<T>, Value) throws -> Void) -> Future<T> {
+    func transform<T>(_ process: @escaping (Promise<T>, Value) throws -> Void) -> Future<T> {
         return .init { promise in
             then { value in
-                promise.do { try transform(promise, value) }
-            }
-            
-            `catch`(promise.reject)
+                promise.do { try process(promise, value) }
+            }.catch(promise.reject)
         }
     }
     
@@ -57,20 +55,24 @@ public extension Future {
         return Future { promise in
             then { value in
                 context { promise.fulfill(with: value) }
-            }
-            
-            `catch` { error in
+            }.catch { error in
                 context { promise.reject(with: error) }
             }
         }
     }
     
-    func transformError(_ transform: @escaping (Promise<Value>, Error) throws -> Void) -> Future {
+    func transformError(_ process: @escaping (Promise<Value>, Error) throws -> Void) -> Future {
         return .init { promise in
-            then(promise.fulfill)
-            
-            `catch` { error in
-                promise.do { try transform(promise, error) }
+            then(promise.fulfill).catch { error in
+                promise.do { try process(promise, error) }
+            }
+        }
+    }
+    
+    func transformError(_ process: @escaping (BasicPromise<Value>, Error) -> Void) -> BasicFuture<Value> {
+        return .init { promise in
+            then(promise.fulfill).catch { error in
+                process(promise, error)
             }
         }
     }
@@ -81,15 +83,21 @@ public extension Future {
         }
     }
     
-    func recover(_ recovery: @escaping (Error) throws -> Future) -> Future {
+    func recover(_ transform: @escaping (Error) throws -> Future) -> Future {
         return transformError { promise, error in
-            promise.observe(try recovery(error))
+            promise.observe(try transform(error))
         }
     }
     
-    func `guard`(_ block: @escaping (Value) throws -> Void) -> Future {
+    func recover(_ transform: @escaping (Error) -> Value) -> BasicFuture<Value> {
+        return transformError { promise, error in
+            promise.fulfill(with: transform(error))
+        }
+    }
+    
+    func `guard`(_ process: @escaping (Value) throws -> Void) -> Future {
         return map { value in
-            try block(value)
+            try process(value)
             return value
         }
     }
@@ -114,13 +122,8 @@ public func raceValues<T>(_ lhs: Future<T>, _ rhs: Future<T>) -> Future<T> {
             }
         }
         
-        lhs
-            .then(promise.fulfill)
-            .catch(handleError)
-        
-        rhs
-            .then(promise.fulfill)
-            .catch(handleError)
+        lhs.then(promise.fulfill).catch(handleError)
+        rhs.then(promise.fulfill).catch(handleError)
     }
 }
 
@@ -129,25 +132,21 @@ public func zip<A, B>(_ lhs: Future<A>, _ rhs: Future<B>) -> Future<(A, B)> {
     var rightValue: B?
     
     return Future { promise in
-        lhs
-            .then { value in
-                if let rightValue = rightValue {
-                    promise.fulfill(with: (value, rightValue))
-                } else {
-                    leftValue = value
-                }
+        lhs.then { value in
+            if let rightValue = rightValue {
+                promise.fulfill(with: (value, rightValue))
+            } else {
+                leftValue = value
             }
-            .catch(promise.reject)
+        }.catch(promise.reject)
         
-        rhs
-            .then { value in
-                if let leftValue = leftValue {
-                    promise.fulfill(with: (leftValue, value))
-                } else {
-                    rightValue = value
-                }
+        rhs.then { value in
+            if let leftValue = leftValue {
+                promise.fulfill(with: (leftValue, value))
+            } else {
+                rightValue = value
             }
-            .catch(promise.reject)
+        }.catch(promise.reject)
     }
 }
 

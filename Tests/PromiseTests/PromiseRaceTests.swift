@@ -32,6 +32,6 @@ final class PromiseRaceTests: XCTestCase {
         let future2 = Future.fulfilled.delayed(by: 0.5)
         
         let first = race(future1, future2)
-        assertWillBeRejected(first)
+        assertIsRejected(first)
     }
 }

@@ -1,6 +1,4 @@
-// see
-// - https://forums.swift.org/t/should-the-function-be-called-map-or-flatmap/12800/6
-// - http://hackage.haskell.org/package/base-4.11.1.0/docs/Data-Traversable.html
+// see https://hackage.haskell.org/package/base/docs/Data-Traversable.html
 
 public extension Optional {
     func traverse<T>(_ transform: (Wrapped) -> BasicFuture<T>) -> BasicFuture<T?> {

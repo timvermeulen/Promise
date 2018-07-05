@@ -3,9 +3,9 @@ import Foundation
 public extension Future {
     convenience init(
         asyncOn queue: DispatchQueue,
-        _ block: @escaping (Promise<Value>) throws -> Void
+        _ process: @escaping (Promise<Value>) throws -> Void
     ) {
-        self.init(asyncOn: queue.asyncContext, block)
+        self.init(asyncOn: queue.asyncContext, process)
     }
     
     convenience init(
@@ -31,12 +31,19 @@ public extension Future {
         let start = Date()
         return map { ($0, Date().timeIntervalSince(start)) }
     }
+    
+    func await() throws -> Value {
+        return try map(Result.success)
+            .recover(Result.failure)
+            .await()
+            .unwrap()
+    }
 }
 
 @available(OSX 10.12, iOS 10.0, *)
 public extension Future {
     func delayed(by interval: TimeInterval) -> Future {
-        return async { resolve in
+        return on(.main).async { resolve in
             Timer.scheduledTimer(withTimeInterval: interval, repeats: false) { _ in resolve() }
         }
     }
@@ -56,7 +63,7 @@ public extension URLSession {
                     } else if let error = error {
                         throw error
                     } else {
-                        fatalError()
+                        preconditionFailure()
                     }
                 }
             }

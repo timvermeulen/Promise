@@ -9,13 +9,13 @@ public final class Future<Value> {
 private extension Future {
     convenience init(
         context: @escaping ExecutionContext,
-        _ block: (Promise<Value>) throws -> Void
+        _ process: (Promise<Value>) throws -> Void
     ) {
         let result = BasicPromise<Result<Value>>(future: .pending)
         self.init(result: result.future.changeContext(context))
         
         let promise = Promise(result: result)
-        promise.do { try block(promise) }
+        promise.do { try process(promise) }
     }
 }
 
@@ -36,12 +36,12 @@ public extension Future {
         self.init(result: future.map(Result.success))
     }
     
-    convenience init(_ block: (Promise<Value>) throws -> Void) {
+    convenience init(_ process: (Promise<Value>) throws -> Void) {
         let result = BasicPromise<Result<Value>>(future: .pending)
         self.init(result: result.future)
         
         let promise = Promise(result: result)
-        promise.do { try block(promise) }
+        promise.do { try process(promise) }
     }
     
     @discardableResult

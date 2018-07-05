@@ -14,9 +14,9 @@ private extension BasicFuture {
         case fulfilled(with: Value)
     }
     
-    convenience init(context: ExecutionContext?, _ block: (BasicPromise<Value>) -> Void) {
+    convenience init(context: ExecutionContext?, _ transform: (BasicPromise<Value>) -> Void) {
         self.init(context: context)
-        block(BasicPromise(future: self))
+        transform(BasicPromise(future: self))
     }
     
     func perform(_ block: @escaping () -> Void) {
@@ -53,8 +53,8 @@ public extension BasicFuture {
         return (promise.future, promise)
     }
     
-    convenience init(_ block: (BasicPromise<Value>) -> Void) {
-        self.init(context: nil, block)
+    convenience init(_ process: (BasicPromise<Value>) -> Void) {
+        self.init(context: nil, process)
     }
     
     @discardableResult

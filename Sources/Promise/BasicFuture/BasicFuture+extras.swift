@@ -3,9 +3,9 @@ public extension BasicFuture {
         self.init { $0.fulfill(with: block()) }
     }
     
-    convenience init(asyncOn context: ExecutionContext, _ block: @escaping (BasicPromise<Value>) -> Void) {
+    convenience init(asyncOn context: ExecutionContext, _ process: @escaping (BasicPromise<Value>) -> Void) {
         self.init { promise in
-            context { block(promise) }
+            context { process(promise) }
         }
     }
     

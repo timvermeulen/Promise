@@ -11,8 +11,8 @@ final class Atomic<Value> {
 }
 
 extension Atomic {
-    func access<T>(_ block: (inout Value) -> T) -> T {
-        return queue.sync { block(&_value) }
+    func access<T>(_ transform: (inout Value) -> T) -> T {
+        return queue.sync { transform(&_value) }
     }
     
     var value: Value {
