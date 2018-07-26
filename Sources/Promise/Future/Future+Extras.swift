@@ -107,7 +107,7 @@ public extension Future {
         }
     }
     
-    func ingoringValue() -> Future<Void> {
+    func ignoringValue() -> Future<Void> {
         return map { _ in }
     }
 }
@@ -180,5 +180,23 @@ public extension Sequence {
     
     func raceValues<T>() -> Future<T> where Element == Future<T> {
         return reduce(.pending, _raceValues)
+    }
+}
+
+public extension Collection {
+    private func retry<T>(orRejectWith error: Error, _ block: @escaping (Element) -> Future<T>) -> Future<T> {
+        guard let value = first else { return .rejected(with: error) }
+
+        return block(value).recover { error in
+            self.dropFirst().retry(orRejectWith: error, block)
+        }
+    }
+
+    func retry<T>(_ block: @escaping (Element) -> Future<T>) -> Future<T> {
+        guard let value = first else { preconditionFailure() }
+
+        return block(value).recover { error in
+            self.dropFirst().retry(orRejectWith: error, block)
+        }
     }
 }
