@@ -1,0 +1,4 @@
+framework module Promise {
+    header "Promise-Swift.h"
+    requires objc
+}
