@@ -3,7 +3,10 @@ public extension BasicFuture {
         self.init { $0.fulfill(with: block()) }
     }
     
-    convenience init(asyncOn context: ExecutionContext, _ process: @escaping (BasicPromise<Value>) -> Void) {
+    convenience init(
+        asyncOn context: ExecutionContext,
+        _ process: @escaping (BasicPromise<Value>) -> Void
+    ) {
         self.init { promise in
             context { process(promise) }
         }
@@ -41,6 +44,10 @@ public extension BasicFuture {
         return transform { promise, value in
             context { promise.fulfill(with: value) }
         }
+    }
+    
+    func ignored() -> BasicFuture<Void> {
+        return map { _ in }
     }
 }
 

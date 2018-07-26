@@ -4,7 +4,7 @@ final class Atomic<Value> {
     private var _value: Value
     private let queue: DispatchQueue
     
-    init(_ value: Value, queue: DispatchQueue = DispatchQueue(label: "\(Atomic.self) lock queue")) {
+    init(_ value: Value, queue: DispatchQueue = DispatchQueue(label: "\(Atomic.self)")) {
         self._value = value
         self.queue = queue
     }

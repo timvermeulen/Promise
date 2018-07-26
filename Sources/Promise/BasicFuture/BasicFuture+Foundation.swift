@@ -1,7 +1,10 @@
 import Foundation
 
 public extension BasicFuture {
-    convenience init(asyncOn queue: DispatchQueue, _ process: @escaping (BasicPromise<Value>) -> Void) {
+    convenience init(
+        asyncOn queue: DispatchQueue,
+        _ process: @escaping (BasicPromise<Value>) -> Void
+    ) {
         self.init(asyncOn: queue.asyncContext, process)
     }
     

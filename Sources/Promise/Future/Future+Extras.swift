@@ -5,7 +5,10 @@ public extension Future {
         }
     }
     
-    convenience init(asyncOn context: ExecutionContext, _ process: @escaping (Promise<Value>) throws -> Void) {
+    convenience init(
+        asyncOn context: ExecutionContext,
+        _ process: @escaping (Promise<Value>) throws -> Void
+    ) {
         self.init { promise in
             context {
                 promise.do { try process(promise) }
@@ -69,7 +72,9 @@ public extension Future {
         }
     }
     
-    func transformError(_ process: @escaping (BasicPromise<Value>, Error) -> Void) -> BasicFuture<Value> {
+    func transformError(
+        _ process: @escaping (BasicPromise<Value>, Error) -> Void
+    ) -> BasicFuture<Value> {
         return .init { promise in
             then(promise.fulfill).catch { error in
                 process(promise, error)
@@ -100,6 +105,10 @@ public extension Future {
             try process(value)
             return value
         }
+    }
+    
+    func ingored() -> Future<Void> {
+        return map { _ in }
     }
 }
 
