@@ -107,7 +107,7 @@ public extension Future {
         }
     }
     
-    func ingored() -> Future<Void> {
+    func ingoringValue() -> Future<Void> {
         return map { _ in }
     }
 }

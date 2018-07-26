@@ -46,7 +46,7 @@ public extension BasicFuture {
         }
     }
     
-    func ignored() -> BasicFuture<Void> {
+    func ignoringValue() -> BasicFuture<Void> {
         return map { _ in }
     }
 }
