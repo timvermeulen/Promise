@@ -88,6 +88,12 @@ public extension Future {
         }
     }
     
+    func mapError(_ transform: @escaping (Error) throws -> Value) -> Future<Value> {
+        return transformError { promise, error in
+            promise.fulfill(with: try transform(error))
+        }
+    }
+    
     func mapError(_ transform: @escaping (Error) -> Value) -> BasicFuture<Value> {
         return transformError { promise, error in
             promise.fulfill(with: transform(error))
