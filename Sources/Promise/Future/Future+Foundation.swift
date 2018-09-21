@@ -34,7 +34,7 @@ public extension Future {
     
     func await() throws -> Value {
         return try map(Result.success)
-            .recover(Result.failure)
+            .mapError(Result.failure)
             .await()
             .unwrap()
     }

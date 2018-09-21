@@ -82,19 +82,13 @@ public extension Future {
         }
     }
     
-    func mapError(_ transform: @escaping (Error) throws -> Error) -> Future {
-        return self.transformError { _, error in
-            throw try transform(error)
-        }
-    }
-    
-    func recover(_ transform: @escaping (Error) throws -> Future) -> Future {
+    func flatMapError(_ transform: @escaping (Error) throws -> Future) -> Future {
         return transformError { promise, error in
             promise.observe(try transform(error))
         }
     }
     
-    func recover(_ transform: @escaping (Error) -> Value) -> BasicFuture<Value> {
+    func mapError(_ transform: @escaping (Error) -> Value) -> BasicFuture<Value> {
         return transformError { promise, error in
             promise.fulfill(with: transform(error))
         }
@@ -184,19 +178,37 @@ public extension Sequence {
 }
 
 public extension Collection {
-    private func retry<T>(orRejectWith error: Error, _ block: @escaping (Element) -> Future<T>) -> Future<T> {
-        guard let value = first else { return .rejected(with: error) }
-
-        return block(value).recover { error in
-            self.dropFirst().retry(orRejectWith: error, block)
+    private func retry<T>(orRejectWith error: Error, _ block: @escaping (Element, Error?) throws -> Future<T>) -> Future<T> {
+        do {
+            guard let value = first else { throw error }
+            
+            return try block(value, error).flatMapError { error in
+                self.dropFirst().retry(orRejectWith: error, block)
+            }
+        } catch {
+            return .rejected(with: error)
         }
     }
 
-    func retry<T>(_ block: @escaping (Element) -> Future<T>) -> Future<T> {
+    func retry<T>(_ block: @escaping (Element, Error?) throws -> Future<T>) -> Future<T> {
         guard let value = first else { preconditionFailure() }
 
-        return block(value).recover { error in
-            self.dropFirst().retry(orRejectWith: error, block)
+        do {
+            return try block(value, nil).flatMapError { error in
+                self.dropFirst().retry(orRejectWith: error, block)
+            }
+        } catch {
+            return .rejected(with: error)
         }
+    }
+}
+
+public extension Future {
+    private func _always(_ handler: @escaping () -> Void) {
+        always(handler)
+    }
+    
+    func waiting<T>(for other: Future<T>) -> Future {
+        return async(other._always)
     }
 }
