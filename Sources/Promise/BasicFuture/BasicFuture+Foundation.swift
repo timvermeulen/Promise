@@ -40,7 +40,7 @@ public extension BasicFuture {
         return value!
     }
     
-    @available(macOS 10.12, iOS 10.0, *)
+    @available(macOS 10.12, iOS 10.0, tvOS 10.0, watchOS 3.0, *)
     func delayed(by interval: TimeInterval) -> BasicFuture {
         return on(.main).async { resolve in
             Timer.scheduledTimer(withTimeInterval: interval, repeats: false) { _ in resolve() }
