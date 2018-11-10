@@ -18,12 +18,12 @@ final class PromiseAllTests: XCTestCase {
         let future3 = Future.fulfilled(with: 3)
         
         let all = [future1, future2, future3].sequence()
-        assertIsFulfilled(all, with: [1, 2, 3])
+        assertWillBeFulfilled(all, with: [1, 2, 3])
     }
     
     func testAllWithEmptyArray() {
         let futures: [Future<Void>] = []
-        let all = futures.sequence()
+        let all: Future<[Void]> = futures.sequence()
         
         testCurrentValue(of: all) { value in
             XCTAssert(value.isEmpty)

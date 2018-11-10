@@ -50,7 +50,7 @@ final class PromiseTests: XCTestCase {
             .map { $0.count }
             .map { $0 * 2 }
         
-        assertIsFulfilled(future, with: string.count * 2)
+        assertWillBeFulfilled(future, with: string.count * 2)
     }
     
     func testFlatMap() {
@@ -98,5 +98,20 @@ final class PromiseTests: XCTestCase {
         }
         
         assertIsFulfilled(future)
+    }
+    
+    func testZalgoContained() {
+        let future = Future.fulfilled
+        var called = false
+        
+        let wait = waitTestExpectation { fulfill in
+            future.then {
+                XCTAssert(called)
+                fulfill()
+            }
+        }
+        
+        called = true
+        wait()
     }
 }

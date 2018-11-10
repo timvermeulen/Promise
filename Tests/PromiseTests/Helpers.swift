@@ -1,18 +1,27 @@
 import XCTest
-import Promise
+@testable import Promise
 
 private let defaultTimeout: TimeInterval = 1
 
 extension XCTestCase {
+    func waitTestExpectation(
+        timeout: TimeInterval = defaultTimeout,
+        isInverted: Bool = false,
+        block: (_ fulfill: @escaping () -> Void) throws -> Void
+    ) rethrows -> () -> Void {
+        let expectation = self.expectation(description: "")
+        expectation.isInverted = isInverted
+        try block { [weak expectation] in expectation?.fulfill() }
+        return { self.wait(for: [expectation], timeout: timeout) }
+    }
+    
     func testExpectation(
         timeout: TimeInterval = defaultTimeout,
         isInverted: Bool = false,
         block: (_ fulfill: @escaping () -> Void) throws -> Void
     ) rethrows {
-        let expectation = self.expectation(description: "")
-        expectation.isInverted = isInverted
-        try block { [weak expectation] in expectation?.fulfill() }
-        wait(for: [expectation], timeout: timeout)
+        let wait = try waitTestExpectation(timeout: timeout, isInverted: isInverted, block: block)
+        wait()
     }
     
     func wait(_ timeout: TimeInterval = defaultTimeout) {
@@ -20,20 +29,16 @@ extension XCTestCase {
     }
     
     func value<Value>(of future: BasicFuture<Value>) -> Value? {
-        var value: Value?
-        future.then { value = $0 }
-        return value
+        return future.testableValue
     }
     
     func value<Value>(of future: Future<Value>) -> Value? {
-        var value: Value?
-        future.then { value = $0 }
+        guard case .value(let value)? = future.testableResult else { return nil }
         return value
     }
     
     func error<Value>(of future: Future<Value>) -> Error? {
-        var error: Error?
-        future.catch { error = $0 }
+        guard case .error(let error)? = future.testableResult else { return nil }
         return error
     }
     

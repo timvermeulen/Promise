@@ -25,12 +25,9 @@ final class BasicFutureTests: XCTestCase {
         let future = BasicFuture.fulfilled
         var thenIsCalled = false
         
-        testExpectation { fulfill in
-            future.then {
-                XCTAssertFalse(thenIsCalled)
-                thenIsCalled = true
-                fulfill()
-            }
+        testValue(of: future) {
+            XCTAssertFalse(thenIsCalled)
+            thenIsCalled = true
         }
         
         wait()

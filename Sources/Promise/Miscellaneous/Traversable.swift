@@ -54,4 +54,24 @@ public extension Sequence {
     func sequence<T>() -> Future<[T]> where Element == Future<T> {
         return traverse { $0 }
     }
+    
+    func traverse(_ transform: (Element) -> BasicFuture<Void>) -> BasicFuture<Void> {
+        return traverse(transform).map { (_: [Void]) in }
+    }
+    
+    func traverse(_ transform: (Element) -> Future<Void>) -> Future<Void> {
+        return traverse(transform).map { (_: [Void]) in }
+    }
+}
+
+public extension Sequence where Element == BasicFuture<Void> {
+    func sequence() -> BasicFuture<Void> {
+        return sequence().map { (_: [Void]) in }
+    }
+}
+
+public extension Sequence where Element == Future<Void> {
+    func sequence() -> Future<Void> {
+        return sequence().map { (_: [Void]) in }
+    }
 }

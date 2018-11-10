@@ -1,14 +1,14 @@
 enum Result<Value> {
-    case success(Value)
-    case failure(Error)
+    case value(Value)
+    case error(Error)
 }
 
 extension Result {
     func unwrap() throws -> Value {
         switch self {
-        case .success(let value):
+        case .value(let value):
             return value
-        case .failure(let error):
+        case .error(let error):
             throw error
         }
     }

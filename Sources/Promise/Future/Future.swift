@@ -19,6 +19,12 @@ private extension Future {
     }
 }
 
+internal extension Future {
+    var testableResult: Result<Value>? {
+        return result.testableValue
+    }
+}
+
 public extension Future {
     static var pending: Future {
         return Future(result: .pending)
@@ -33,7 +39,7 @@ public extension Future {
     }
     
     convenience init(_ future: BasicFuture<Value>) {
-        self.init(result: future.map(Result.success))
+        self.init(result: future.map(Result.value))
     }
     
     convenience init(_ process: (Promise<Value>) throws -> Void) {
@@ -47,7 +53,7 @@ public extension Future {
     @discardableResult
     func then(_ handler: @escaping (Value) -> Void) -> Future {
         result.then { result in
-            if case .success(let value) = result {
+            if case .value(let value) = result {
                 handler(value)
             }
         }
@@ -58,7 +64,7 @@ public extension Future {
     @discardableResult
     func `catch`(_ handler: @escaping (Error) -> Void) -> Future {
         result.then { result in
-            if case .failure(let error) = result {
+            if case .error(let error) = result {
                 handler(error)
             }
         }

@@ -4,7 +4,7 @@ import Promise
 final class PromiseZipTests: XCTestCase {
     func testZip() {
         let future: Future = zip(.fulfilled, .fulfilled)
-        assertIsFulfilled(future)
+        assertWillBeFulfilled(future)
     }
 
     func testAsyncZip() {

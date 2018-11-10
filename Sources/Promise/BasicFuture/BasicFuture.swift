@@ -1,8 +1,8 @@
 public final class BasicFuture<Value> {
     private let state: Atomic<State>
-    private let context: ExecutionContext?
+    private let context: ExecutionContext
     
-    private init(context: ExecutionContext?) {
+    private init(context: @escaping ExecutionContext) {
         self.state = Atomic(.pending(callbacks: []))
         self.context = context
     }
@@ -14,17 +14,9 @@ private extension BasicFuture {
         case fulfilled(with: Value)
     }
     
-    convenience init(context: ExecutionContext?, _ process: (BasicPromise<Value>) -> Void) {
+    convenience init(context: @escaping ExecutionContext, _ process: (BasicPromise<Value>) -> Void) {
         self.init(context: context)
         process(BasicPromise(future: self))
-    }
-    
-    func perform(_ block: @escaping () -> Void) {
-        if let context = context {
-            context { block() }
-        } else {
-            block()
-        }
     }
 }
 
@@ -38,14 +30,19 @@ internal extension BasicFuture {
         }
         
         callbacks?.forEach { callback in
-            perform { callback(value) }
+            context { callback(value) }
         }
+    }
+    
+    var testableValue: Value? {
+        guard case .fulfilled(let value) = state.value else { return nil }
+        return value
     }
 }
 
 public extension BasicFuture {
     static var pending: BasicFuture {
-        return BasicFuture(context: nil)
+        return BasicFuture(context: defaultExecutionContext)
     }
     
     static func make() -> (future: BasicFuture, promise: BasicPromise<Value>) {
@@ -54,7 +51,7 @@ public extension BasicFuture {
     }
     
     convenience init(_ process: (BasicPromise<Value>) -> Void) {
-        self.init(context: nil, process)
+        self.init(context: defaultExecutionContext, process)
     }
     
     @discardableResult
@@ -73,7 +70,7 @@ public extension BasicFuture {
         }
         
         if let value = value {
-            perform { callback(value) }
+            context { callback(value) }
         }
         
         return self

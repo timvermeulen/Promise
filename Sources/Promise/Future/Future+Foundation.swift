@@ -33,8 +33,8 @@ public extension Future {
     }
     
     func await() throws -> Value {
-        return try map(Result.success)
-            .mapError(Result.failure)
+        return try map(Result.value)
+            .mapError(Result.error)
             .await()
             .unwrap()
     }

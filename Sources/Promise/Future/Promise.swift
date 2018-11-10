@@ -8,11 +8,11 @@ public final class Promise<Value> {
 
 public extension Promise {
     func fulfill(with value: Value) {
-        result.fulfill(with: .success(value))
+        result.fulfill(with: .value(value))
     }
     
     func reject(with error: Error) {
-        result.fulfill(with: .failure(error))
+        result.fulfill(with: .error(error))
     }
     
     func `do`(_ block: () throws -> Void) {

@@ -7,16 +7,16 @@ final class PromiseGuardTests: XCTestCase {
             if $0 { throw SimpleError() }
         }
         
-        assertIsRejected(future)
+        assertWillBeRejected(future)
     }
     
     func testGuardSucceeds() {
         let future = Future.fulfilled.guard {}
-        assertIsFulfilled(future)
+        assertWillBeFulfilled(future)
     }
     
     func testGuardOnlyCalledOnSuccess() {
         let future = Future.rejected(with: SimpleError()).guard { XCTFail() }
-        assertIsRejected(future)
+        assertWillBeRejected(future)
     }
 }
