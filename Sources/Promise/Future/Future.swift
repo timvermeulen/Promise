@@ -1,21 +1,8 @@
 public final class Future<Value> {
     private let result: BasicFuture<Result<Value>>
     
-    init(result: BasicFuture<Result<Value>>) {
+    internal init(result: BasicFuture<Result<Value>>) {
         self.result = result
-    }
-}
-
-private extension Future {
-    convenience init(
-        context: @escaping ExecutionContext,
-        _ process: (Promise<Value>) throws -> Void
-    ) {
-        let result = BasicPromise<Result<Value>>(future: .pending)
-        self.init(result: result.future.changeContext(context))
-        
-        let promise = Promise(result: result)
-        promise.do { try process(promise) }
     }
 }
 
@@ -82,8 +69,6 @@ public extension Future {
     }
     
     func changeContext(_ context: @escaping ExecutionContext) -> Future {
-        return Future(context: context) { promise in
-            promise.observe(self)
-        }
+        return .init(result: result.changeContext(context))
     }
 }

@@ -16,9 +16,7 @@ public extension Future {
     }
     
     func on(_ queue: DispatchQueue) -> Future {
-        return changeContext { resolve in
-            queue.async(execute: resolve)
-        }
+        return changeContext(queue.asyncContext)
     }
     
     func asyncAfter(deadline: DispatchTime, on queue: DispatchQueue) -> Future {

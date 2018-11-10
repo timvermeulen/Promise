@@ -4,13 +4,13 @@ import Promise
 final class PromiseRecoverTests: XCTestCase {
     func testRecover() {
         let future = Future<Void>.rejected(with: SimpleError()).delayed(by: 0.1)
-        let recovered = future.mapError { _ in () }
+        let recovered = future.mapError { _ in }
         assertWillBeFulfilled(recovered)
     }
     
     func testRecoverInstant() {
         let future = Future<Void>.rejected(with: SimpleError())
-        let recovered = future.mapError { _ in () }
+        let recovered = future.mapError { _ in }
         assertWillBeFulfilled(recovered)
     }
     

@@ -21,12 +21,12 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
+		220A88DA21978534008FEB45 /* DispatchQueue+ExecutionContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 220A88D921978534008FEB45 /* DispatchQueue+ExecutionContext.swift */; };
 		OBJ_47 /* Atomic.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_9 /* Atomic.swift */; };
 		OBJ_48 /* BasicFuture+Foundation.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_11 /* BasicFuture+Foundation.swift */; };
 		OBJ_49 /* BasicFuture+Extras.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_12 /* BasicFuture+Extras.swift */; };
 		OBJ_50 /* BasicFuture.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_13 /* BasicFuture.swift */; };
 		OBJ_51 /* BasicPromise.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_14 /* BasicPromise.swift */; };
-		OBJ_52 /* DispatchQueue+ExecutionContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_15 /* DispatchQueue+ExecutionContext.swift */; };
 		OBJ_53 /* ExecutionContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_16 /* ExecutionContext.swift */; };
 		OBJ_54 /* Future+Foundation.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_18 /* Future+Foundation.swift */; };
 		OBJ_55 /* Future+Extras.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_19 /* Future+Extras.swift */; };
@@ -69,11 +69,11 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		220A88D921978534008FEB45 /* DispatchQueue+ExecutionContext.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "DispatchQueue+ExecutionContext.swift"; sourceTree = "<group>"; };
 		OBJ_11 /* BasicFuture+Foundation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BasicFuture+Foundation.swift"; sourceTree = "<group>"; };
 		OBJ_12 /* BasicFuture+Extras.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BasicFuture+Extras.swift"; sourceTree = "<group>"; };
 		OBJ_13 /* BasicFuture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BasicFuture.swift; sourceTree = "<group>"; };
 		OBJ_14 /* BasicPromise.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BasicPromise.swift; sourceTree = "<group>"; };
-		OBJ_15 /* DispatchQueue+ExecutionContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DispatchQueue+ExecutionContext.swift"; sourceTree = "<group>"; };
 		OBJ_16 /* ExecutionContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExecutionContext.swift; sourceTree = "<group>"; };
 		OBJ_18 /* Future+Foundation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Future+Foundation.swift"; sourceTree = "<group>"; };
 		OBJ_19 /* Future+Extras.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Future+Extras.swift"; sourceTree = "<group>"; };
@@ -123,8 +123,8 @@
 			isa = PBXGroup;
 			children = (
 				OBJ_9 /* Atomic.swift */,
-				OBJ_15 /* DispatchQueue+ExecutionContext.swift */,
 				OBJ_16 /* ExecutionContext.swift */,
+				220A88D921978534008FEB45 /* DispatchQueue+ExecutionContext.swift */,
 				OBJ_22 /* Result.swift */,
 				OBJ_23 /* Traversable.swift */,
 			);
@@ -312,11 +312,11 @@
 			buildActionMask = 0;
 			files = (
 				OBJ_47 /* Atomic.swift in Sources */,
+				220A88DA21978534008FEB45 /* DispatchQueue+ExecutionContext.swift in Sources */,
 				OBJ_48 /* BasicFuture+Foundation.swift in Sources */,
 				OBJ_49 /* BasicFuture+Extras.swift in Sources */,
 				OBJ_50 /* BasicFuture.swift in Sources */,
 				OBJ_51 /* BasicPromise.swift in Sources */,
-				OBJ_52 /* DispatchQueue+ExecutionContext.swift in Sources */,
 				OBJ_53 /* ExecutionContext.swift in Sources */,
 				OBJ_54 /* Future+Foundation.swift in Sources */,
 				OBJ_55 /* Future+Extras.swift in Sources */,

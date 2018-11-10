@@ -210,11 +210,7 @@ public extension Collection {
 }
 
 public extension Future {
-    private func _always(_ handler: @escaping () -> Void) {
-        always(handler)
-    }
-    
     func waiting<T>(for other: Future<T>) -> Future {
-        return async(other._always)
+        return async { other.always($0) }
     }
 }

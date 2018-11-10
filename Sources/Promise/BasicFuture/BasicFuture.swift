@@ -9,8 +9,21 @@ public final class BasicFuture<Value> {
 }
 
 private extension BasicFuture {
+    struct Callback {
+        let changesContext: Bool
+        let callback: (Value) -> Void
+        
+        func call(with value: Value, on context: ExecutionContext) {
+            if changesContext {
+                callback(value)
+            } else {
+                context { [callback] in callback(value) }
+            }
+        }
+    }
+    
     enum State {
-        case pending(callbacks: [(Value) -> Void])
+        case pending(callbacks: [Callback])
         case fulfilled(with: Value)
     }
     
@@ -18,20 +31,37 @@ private extension BasicFuture {
         self.init(context: context)
         process(BasicPromise(future: self))
     }
+    
+    func addCallback(_ callback: Callback) {
+        let value = state.access { state -> Value? in
+            switch state {
+            case .pending(var callbacks):
+                state = .pending(callbacks: [])
+                callbacks.append(callback)
+                state = .pending(callbacks: callbacks)
+                return nil
+                
+            case .fulfilled(let value):
+                return value
+            }
+        }
+        
+        if let value = value {
+            callback.call(with: value, on: context)
+        }
+    }
 }
 
 internal extension BasicFuture {
     func fulfill(with value: Value) {
-        let callbacks: [(Value) -> Void]? = state.access { state in
+        let callbacks: [Callback]? = state.access { state in
             guard case .pending(let callbacks) = state else { return nil }
             
             state = .fulfilled(with: value)
             return callbacks
         }
         
-        callbacks?.forEach { callback in
-            context { callback(value) }
-        }
+        callbacks?.forEach { $0.call(with: value, on: context) }
     }
     
     var testableValue: Value? {
@@ -56,29 +86,13 @@ public extension BasicFuture {
     
     @discardableResult
     func then(_ callback: @escaping (Value) -> Void) -> BasicFuture {
-        let value = state.access { state -> Value? in
-            switch state {
-            case .pending(var callbacks):
-                state = .pending(callbacks: [])
-                callbacks.append(callback)
-                state = .pending(callbacks: callbacks)
-                return nil
-                
-            case .fulfilled(let value):
-                return value
-            }
-        }
-        
-        if let value = value {
-            context { callback(value) }
-        }
-        
+        addCallback(Callback(changesContext: false, callback: callback))
         return self
     }
     
     func changeContext(_ context: @escaping ExecutionContext) -> BasicFuture {
         return BasicFuture(context: context) { promise in
-            then(promise.fulfill)
+            addCallback(Callback(changesContext: true, callback: promise.fulfill))
         }
     }
 }

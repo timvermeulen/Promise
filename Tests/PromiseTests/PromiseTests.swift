@@ -114,4 +114,13 @@ final class PromiseTests: XCTestCase {
         called = true
         wait()
     }
+    
+    func testContextChange() {
+        let future = Future.fulfilled
+            .changeContext { _ in XCTFail() }
+            .changeContext { $0() }
+            .map {}
+        
+        assertIsFulfilled(future)
+    }
 }

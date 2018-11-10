@@ -1,7 +1,7 @@
 public final class BasicPromise<Value> {
-    let future: BasicFuture<Value>
+    internal let future: BasicFuture<Value>
     
-    init(future: BasicFuture<Value>) {
+    internal init(future: BasicFuture<Value>) {
         self.future = future
     }
 }
